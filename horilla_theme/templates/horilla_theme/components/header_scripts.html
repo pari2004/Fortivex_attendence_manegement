@@ -1,0 +1,345 @@
+{% load static %}
+{% load horillafilters %}
+{% get_company as theme_obj %}
+<style>
+    /* Legacy (non-Tailwind) primary CTA button — used by most Save/Create
+       forms across the app. Recolor it to follow the selected company
+       theme, same as the Tailwind 'brand'/'primary' color below. */
+    .oh-btn--secondary,
+    .oh-btn--secondary:disabled {
+        background-color: {{ theme_obj.primary_600|default:"#E54F38" }} !important;
+    }
+    .oh-btn--secondary:hover,
+    .oh-btn--secondary:focus,
+    .oh-btn--secondary:focus-visible {
+        background-color: {{ theme_obj.primary_700|default:"#ce4732" }} !important;
+    }
+    .oh-btn--secondary-outline,
+    .oh-btn--secondary-link {
+        color: {{ theme_obj.primary_600|default:"#E54F38" }} !important;
+    }
+    .oh-btn--secondary-outline:hover,
+    .oh-btn--secondary-outline:focus,
+    .oh-btn--secondary-outline:focus-visible,
+    .oh-btn--secondary-link:hover,
+    .oh-btn--secondary-link:focus,
+    .oh-btn--secondary-link:focus-visible {
+        color: {{ theme_obj.primary_700|default:"#ce4732" }} !important;
+    }
+
+    /* Active-filter chip bar ("Filters:" label + each filter's remove-X,
+       e.g. "Is active: Yes"). Follow the selected company theme too. */
+    .oh-titlebar__tag--custom {
+        background-color: {{ theme_obj.primary_600|default:"#E54F38" }} !important;
+    }
+    .oh-titlebar__tag-close {
+        background-color: {{ theme_obj.primary_600|default:"#E54F38" }} !important;
+    }
+    .oh-titlebar__tag-close:hover {
+        background-color: {{ theme_obj.primary_700|default:"#ce4732" }} !important;
+    }
+    .oh-titlebar__tag.filter-field {
+        border-color: {{ theme_obj.primary_600|default:"#E54F38" }} !important;
+    }
+
+    /* "Save And Add Another" — secondary CTA next to Save on create forms.
+       Uses a lighter tint of the theme color so it stays visually distinct
+       from the solid "Save" button while still following the theme. */
+    .oh-btn--add-another {
+        background-color: {{ theme_obj.primary_500|default:"#F7C8C1" }} !important;
+        color: #ffffff !important;
+        border: 1px solid {{ theme_obj.primary_500|default:"#F7C8C1" }} !important;
+    }
+    .oh-btn--add-another:hover,
+    .oh-btn--add-another:focus,
+    .oh-btn--add-another:focus-visible {
+        background-color: {{ theme_obj.primary_600|default:"#E54F38" }} !important;
+        border-color: {{ theme_obj.primary_600|default:"#E54F38" }} !important;
+    }
+
+    /* Checkmark bullet on "Changes" list items (e.g. Employee > History tab). */
+    .list-checked li:before {
+        color: {{ theme_obj.primary_600|default:"#E54F38" }} !important;
+    }
+
+    /* Legacy light icon button (e.g. the "View Comment" icon on Shift/Work
+       Type/Document request lists). Icon color follows the theme too. */
+    .oh-btn--light {
+        color: {{ theme_obj.primary_600|default:"#E54F38" }} !important;
+    }
+    .oh-btn--light:hover,
+    .oh-btn--light:focus,
+    .oh-btn--light:focus-visible {
+        color: {{ theme_obj.primary_700|default:"#ce4732" }} !important;
+    }
+</style>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    var btn = document.getElementById("themeToggleButton");
+    if (!btn) return;
+
+    btn.addEventListener("click", function (e) {
+        e.preventDefault();
+
+        fetch("{% url 'toggle_theme' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "X-Requested-With": "XMLHttpRequest"
+        }
+        })
+        .then(response => {
+        if (response.status === 204) {
+            // Since server stored the new theme, we just mirror it in the UI
+
+            const isDark = document.documentElement.classList.toggle("dark");
+            document.body.classList.toggle("dark", isDark);
+
+            const icon = btn.querySelector("i");
+            if (icon) {
+            icon.classList.toggle("fa-moon", !isDark);
+            icon.classList.toggle("fa-lightbulb", isDark);
+            }
+        }
+        })
+        .catch(err => console.error(err));
+    });
+    });
+</script>
+
+<script>
+    window.CURRENT_LANGUAGE = "{{ LANGUAGE_CODE }}";
+    var at_work_seconds = {{ request.user.employee_get.get_forecasted_at_work.forecasted_at_work_seconds }}
+    var run = 0
+</script>
+<script src="{% static 'horilla_theme/assets/js/tailwind.js' %}"></script>
+<script>
+    window.tailwind.config = {
+        theme: {
+            colors: {
+                white: '#FFFFFF',
+
+                primary: {
+                    50:  '{{ theme_obj.primary_50  | default:"#f6f6f6" }}',
+                    100: '{{ theme_obj.primary_100 | default:"#FFF5F1" }}',
+                    200: '{{ theme_obj.primary_200 | default:"#FEF6F5" }}',
+                    300: '{{ theme_obj.primary_300 | default:"#FCEDEB" }}',
+                    400: '{{ theme_obj.primary_400 | default:"#FBE5E1" }}',
+                    500: '{{ theme_obj.primary_500 | default:"#F7C8C1" }}',
+                    600: '{{ theme_obj.primary_600 | default:"#E54F38" }}',
+                    700: '{{ theme_obj.primary_700 | default:"#ce4732" }}',
+                    800: '{{ theme_obj.primary_800 | default:"#AC3B2A" }}',
+                    900: '{{ theme_obj.primary_900 | default:"#672419" }}',
+                },
+
+                /* 'brand' = primary CTA color (Create/Save/Submit). Mirrors the
+                   company's selected theme color so CTAs follow the theme, same
+                   as 'primary'. 'info' = fixed blue for Edit/View/Details. */
+                brand: {
+                    50:  '{{ theme_obj.primary_50  | default:"#f6f6f6" }}',
+                    100: '{{ theme_obj.primary_100 | default:"#FFF5F1" }}',
+                    200: '{{ theme_obj.primary_200 | default:"#FEF6F5" }}',
+                    300: '{{ theme_obj.primary_300 | default:"#FCEDEB" }}',
+                    400: '{{ theme_obj.primary_400 | default:"#FBE5E1" }}',
+                    500: '{{ theme_obj.primary_500 | default:"#F7C8C1" }}',
+                    600: '{{ theme_obj.primary_600 | default:"#E54F38" }}',
+                    700: '{{ theme_obj.primary_700 | default:"#ce4732" }}',
+                    800: '{{ theme_obj.primary_800 | default:"#AC3B2A" }}',
+                    900: '{{ theme_obj.primary_900 | default:"#672419" }}',
+                },
+                info: {
+                    50:  '#eaf6fc', 100: '#c9e8f7', 200: '#95d0ec', 300: '#5eb8e2',
+                    400: '#3aa6da', 500: '#2E9BD6', 600: '#2E9BD6', 700: '#2585b8',
+                    800: '#1f6d97', 900: '#184f6f',
+                },
+
+                dark: {
+                    50:  '{{ theme_obj.dark_50  | default:"#E6E6E6" }}',
+                    100: '{{ theme_obj.dark_100 | default:"#A8A8A8" }}',
+                    200: '{{ theme_obj.dark_200 | default:"#515151" }}',
+                    300: '{{ theme_obj.dark_300 | default:"#501C14" }}',
+                    400: '{{ theme_obj.dark_400 | default:"#64748B" }}',
+                    500: '{{ theme_obj.dark_500 | default:"#190906" }}',
+                    600: '{{ theme_obj.dark_600 | default:"#000000" }}',
+                },
+
+                secondary: {
+                    50:  '{{ theme_obj.secondary_50  | default:"#f8fafc" }}',
+                    100: '{{ theme_obj.secondary_100 | default:"#f1f5f9" }}',
+                    200: '{{ theme_obj.secondary_200 | default:"#e2e8f0" }}',
+                    300: '{{ theme_obj.secondary_300 | default:"#cbd5e1" }}',
+                    400: '{{ theme_obj.secondary_400 | default:"#FBE5E1" }}',
+                    500: '{{ theme_obj.secondary_500 | default:"#F7C8C1" }}',
+                    600: '{{ theme_obj.secondary_600 | default:"#E54F38" }}',
+                    700: '{{ theme_obj.secondary_700 | default:"#334155" }}',
+                    800: '{{ theme_obj.secondary_800 | default:"#1e293b" }}',
+                    900: '{{ theme_obj.secondary_900 | default:"#0f172a" }}',
+                },
+
+                success: {
+                    light: "#86efac",
+                    DEFAULT: "#22c55e",
+                    dark: "#15803d",
+                },
+                warning: {
+                    light: "#fde68a",
+                    DEFAULT: "#f59e0b",
+                    dark: "#b45309",
+                },
+                danger: {
+                    light: "#fca5a5",
+                    DEFAULT: "#ef4444",
+                    dark: "#b91c1c",
+                },
+            },
+
+            extend: {
+                boxShadow: {
+                    card: "0px 0px 10px rgba(0, 0, 0, 0.05)",
+                },
+                spacing: {
+                    18: "4.5rem",
+                    72: "18rem",
+                    84: "21rem",
+                    96: "24rem",
+                },
+                borderRadius: {
+                    "4xl": "2rem",
+                    "5xl": "2.5rem",
+                },
+                fontSize: {
+                    xxs: "0.625rem",
+                },
+                height: {
+                    "screen-50": "50vh",
+                    "screen-75": "75vh",
+                },
+            },
+        },
+    };
+</script>
+<script src="{% static '/jquery/ajax.js' %}"></script>
+<script src="{% static '/jquery/jquery.min.js' %}"></script>
+<script src="{% static '/jquery/jqueryui.js' %}"></script>
+<script src="{% static '/base/toggleColumn.js' %}"></script>
+<script src="{% static '/build/js/orgChart.js' %}"></script>
+<script src="{% static 'build/js/driver.js' %}"></script>
+<script src="{% static 'build/js/clearFilter.js' %}"></script>
+<script defer src="{% static '/cdn/alpine/alpine.min.js' %}"></script>
+<script src="{% static 'cdn/chartJs/scripts/chart.js' %}"></script>
+
+{% block header_scripts %}
+{% endblock header_scripts %}
+
+<script>
+    // Site-wide: keep tabbed list panels (e.g. Attendance To Validate / OT /
+    // Validated, Requested / All Attendances) the same size as a plain list
+    // view (e.g. Employees) regardless of how many rows a given tab has.
+    // Uses a single MutationObserver on <body> rather than specific htmx
+    // event names, so it keeps working no matter which code path swaps the
+    // content in (declarative hx-get, htmx.ajax(), a raw jQuery fallback, or
+    // a full SPA page navigation that replaces #listContainer itself).
+    (function () {
+        var BOTTOM_MARGIN = 20; // matches the plain list view's own bottom gap
+        var SELECTOR = "#listContainer .heightContainer, #listContainer .attendance-request-scroll";
+        var pending = null;
+
+        function sizeVisibleScrollContainers() {
+            var containers = document.querySelectorAll(SELECTOR);
+            for (var i = 0; i < containers.length; i++) {
+                var container = containers[i];
+                if (container.offsetParent === null) {
+                    continue; // hidden (inactive tab) - leave it alone
+                }
+                var top = container.getBoundingClientRect().top;
+                var height = window.innerHeight - top - BOTTOM_MARGIN;
+                if (height > 100) {
+                    container.style.maxHeight = height + "px";
+                    container.style.minHeight = height + "px";
+                }
+            }
+        }
+
+        function scheduleResize() {
+            if (pending) {
+                clearTimeout(pending);
+            }
+            pending = setTimeout(sizeVisibleScrollContainers, 30);
+        }
+
+        window.addEventListener("resize", scheduleResize);
+        document.addEventListener("DOMContentLoaded", function () {
+            scheduleResize();
+            if (window.MutationObserver) {
+                new MutationObserver(function (mutations) {
+                    for (var i = 0; i < mutations.length; i++) {
+                        if (mutations[i].addedNodes.length) {
+                            scheduleResize();
+                            return;
+                        }
+                    }
+                }).observe(document.body, { childList: true, subtree: true });
+            }
+        });
+        scheduleResize();
+    })();
+</script>
+
+<script>
+    // Site-wide: grouped/accordion list views (generic/group_by_table.html,
+    // e.g. Hour Accounts) reload their ENTIRE accordion whenever a single
+    // group's own pagination is used (each group's page-jump control targets
+    // the shared outer container). The server only marks the first group open
+    // by default, so every OTHER group the user had manually expanded would
+    // collapse back on that reload. Capture which groups were open right
+    // before the swap and re-open them once the new content lands.
+    (function () {
+        var openGroupsByContainerId = {};
+
+        function captureOpenGroups(target) {
+            if (!target || !target.id) {
+                return;
+            }
+            var headers = target.querySelectorAll(".oh-accordion.oh-accordion--show > .oh-accordion-header[data-group]");
+            if (headers.length) {
+                openGroupsByContainerId[target.id] = Array.prototype.map.call(headers, function (header) {
+                    return header.getAttribute("data-group");
+                });
+            }
+        }
+
+        function restoreOpenGroups(containerId) {
+            var indices = openGroupsByContainerId[containerId];
+            if (!indices) {
+                return;
+            }
+            var container = document.getElementById(containerId);
+            if (!container) {
+                return;
+            }
+            indices.forEach(function (idx) {
+                var header = container.querySelector('.oh-accordion-header[data-group="' + idx + '"]');
+                if (header) {
+                    header.closest(".oh-accordion").classList.add("oh-accordion--show");
+                }
+            });
+        }
+
+        // Captured on beforeRequest (not beforeSwap): a separate site-wide
+        // loading-indicator handler wipes the target's content down to a
+        // skeleton div as soon as the request starts, so by the time
+        // beforeSwap fires the old accordion state is already gone. This
+        // script is loaded in <head>, ahead of that handler (loaded in the
+        // footer), so it observes the DOM before the wipe happens.
+        document.addEventListener("htmx:beforeRequest", function (evt) {
+            captureOpenGroups(evt.detail.target);
+        });
+
+        document.addEventListener("htmx:afterSwap", function (evt) {
+            var id = evt.detail.target && evt.detail.target.id;
+            if (id) {
+                restoreOpenGroups(id);
+            }
+        });
+    })();
+</script>

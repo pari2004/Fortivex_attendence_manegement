@@ -1,0 +1,227 @@
+{% load i18n %}
+<div class="oh-modal" id="famsAttendanceCaptureModal" role="dialog" aria-labelledby="famsAttendanceCaptureLabel" aria-hidden="true">
+    <div class="oh-modal__dialog" style="max-width: 420px;">
+        <div class="oh-modal__dialog-header">
+            <h2 class="oh-modal__dialog-title" id="famsCaptureTitle">{% trans "Check-In" %}</h2>
+            <button type="button" class="oh-modal__close" aria-label="{% trans 'Close' %}" onclick="famsCloseAttendanceCapture()">
+                <ion-icon name="close-outline"></ion-icon>
+            </button>
+        </div>
+        <div class="oh-modal__dialog-body">
+            <p class="text-muted" style="font-size: 13px;">
+                {% trans "A selfie and your current location are required to mark attendance." %}
+            </p>
+            <div style="position: relative; width: 100%; aspect-ratio: 4 / 3; background: #000; border-radius: 8px; overflow: hidden;">
+                <video id="famsCamVideo" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover; display: block;"></video>
+                <img id="famsCamPreview" alt="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+            </div>
+            <canvas id="famsCamCanvas" style="display: none;"></canvas>
+            <p id="famsCamStatus" style="font-size: 12px; color: #888; margin-top: 8px; margin-bottom: 2px;">
+                {% trans "Starting camera…" %}
+            </p>
+            <p id="famsGeoStatus" style="font-size: 12px; color: #888; margin: 0;">
+                {% trans "Fetching location…" %}
+            </p>
+        </div>
+        <div class="oh-modal__dialog-footer">
+            <button type="button" class="oh-btn oh-btn--secondary" id="famsCaptureBtn" onclick="famsCapturePhoto()">
+                {% trans "Capture" %}
+            </button>
+            <button type="button" class="oh-btn oh-btn--light" id="famsRetakeBtn" style="display: none" onclick="famsRetakePhoto()">
+                {% trans "Retake" %}
+            </button>
+            <button type="button" class="oh-btn oh-btn--success" id="famsSubmitBtn" style="display: none" onclick="famsSubmitAttendance()">
+                {% trans "Submit" %}
+            </button>
+            <button type="button" class="oh-btn oh-btn--danger-outline" onclick="famsCloseAttendanceCapture()">
+                {% trans "Cancel" %}
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var famsCaptureMode = null;
+        var famsStream = null;
+        var famsPhotoDataUrl = null;
+        var famsGeo = null;
+
+        function famsStartCamera() {
+            var video = document.getElementById("famsCamVideo");
+            document.getElementById("famsCamStatus").textContent = "{% trans 'Starting camera…' %}";
+            if (!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
+                document.getElementById("famsCamStatus").textContent = "{% trans 'Camera not supported on this device.' %}";
+                return;
+            }
+            navigator.mediaDevices
+                .getUserMedia({ video: { facingMode: "user" }, audio: false })
+                .then(function (stream) {
+                    famsStream = stream;
+                    video.srcObject = stream;
+                    document.getElementById("famsCamStatus").textContent = "{% trans 'Camera ready' %}";
+                })
+                .catch(function () {
+                    document.getElementById("famsCamStatus").textContent =
+                        "{% trans 'Camera access denied — a selfie is required to continue.' %}";
+                });
+        }
+
+        function famsStopStream() {
+            if (famsStream) {
+                famsStream.getTracks().forEach(function (t) {
+                    t.stop();
+                });
+                famsStream = null;
+            }
+        }
+
+        function famsFetchLocation() {
+            document.getElementById("famsGeoStatus").textContent = "{% trans 'Fetching location…' %}";
+            if (!navigator.geolocation) {
+                document.getElementById("famsGeoStatus").textContent =
+                    "{% trans 'Geolocation not supported on this device.' %}";
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                function (pos) {
+                    famsGeo = {
+                        lat: pos.coords.latitude,
+                        lng: pos.coords.longitude,
+                        accuracy: pos.coords.accuracy,
+                    };
+                    document.getElementById("famsGeoStatus").textContent =
+                        "{% trans 'Location captured' %} (±" + Math.round(pos.coords.accuracy) + "m)";
+                },
+                function () {
+                    document.getElementById("famsGeoStatus").textContent =
+                        "{% trans 'Location access denied — your location is required to continue.' %}";
+                },
+                { enableHighAccuracy: true, timeout: 15000 }
+            );
+        }
+
+        function famsGetCookie(name) {
+            var value = "; " + document.cookie;
+            var parts = value.split("; " + name + "=");
+            if (parts.length === 2) return parts.pop().split(";").shift();
+            return "";
+        }
+
+        window.famsOpenAttendanceCapture = function (mode) {
+            famsCaptureMode = mode;
+            famsPhotoDataUrl = null;
+            famsGeo = null;
+
+            document.getElementById("famsCaptureTitle").textContent =
+                mode === "in" ? "{% trans 'Check-In Selfie' %}" : "{% trans 'Check-Out Selfie' %}";
+
+            var video = document.getElementById("famsCamVideo");
+            var preview = document.getElementById("famsCamPreview");
+            video.style.display = "";
+            preview.style.display = "none";
+
+            document.getElementById("famsCaptureBtn").style.display = "";
+            document.getElementById("famsRetakeBtn").style.display = "none";
+            document.getElementById("famsSubmitBtn").style.display = "none";
+            document.getElementById("famsSubmitBtn").disabled = false;
+            document.getElementById("famsSubmitBtn").textContent = "{% trans 'Submit' %}";
+
+            var modal = document.getElementById("famsAttendanceCaptureModal");
+            modal.classList.add("oh-modal--show");
+            modal.setAttribute("aria-hidden", "false");
+
+            famsStartCamera();
+            famsFetchLocation();
+        };
+
+        window.famsCloseAttendanceCapture = function () {
+            famsStopStream();
+            var modal = document.getElementById("famsAttendanceCaptureModal");
+            if (modal) {
+                modal.classList.remove("oh-modal--show");
+                modal.setAttribute("aria-hidden", "true");
+            }
+        };
+
+        window.famsCapturePhoto = function () {
+            var video = document.getElementById("famsCamVideo");
+            if (!video.videoWidth) {
+                alert("{% trans 'Camera is not ready yet — please wait a moment and try again.' %}");
+                return;
+            }
+            var canvas = document.getElementById("famsCamCanvas");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+            famsPhotoDataUrl = canvas.toDataURL("image/jpeg", 0.85);
+
+            var preview = document.getElementById("famsCamPreview");
+            preview.src = famsPhotoDataUrl;
+            preview.style.display = "";
+            video.style.display = "none";
+            famsStopStream();
+
+            document.getElementById("famsCaptureBtn").style.display = "none";
+            document.getElementById("famsRetakeBtn").style.display = "";
+            document.getElementById("famsSubmitBtn").style.display = "";
+        };
+
+        window.famsRetakePhoto = function () {
+            famsPhotoDataUrl = null;
+            document.getElementById("famsCamPreview").style.display = "none";
+            document.getElementById("famsCamVideo").style.display = "";
+            document.getElementById("famsCaptureBtn").style.display = "";
+            document.getElementById("famsRetakeBtn").style.display = "none";
+            document.getElementById("famsSubmitBtn").style.display = "none";
+            famsStartCamera();
+        };
+
+        window.famsSubmitAttendance = function () {
+            if (!famsPhotoDataUrl) {
+                alert("{% trans 'Please capture a selfie first.' %}");
+                return;
+            }
+            if (!famsGeo) {
+                alert("{% trans 'Location is still being fetched. Please wait a few seconds and try again.' %}");
+                return;
+            }
+
+            var url = famsCaptureMode === "in" ? "{% url 'clock-in' %}" : "{% url 'clock-out' %}";
+            var fd = new FormData();
+            fd.append("selfie", famsPhotoDataUrl);
+            fd.append("latitude", famsGeo.lat);
+            fd.append("longitude", famsGeo.lng);
+
+            var submitBtn = document.getElementById("famsSubmitBtn");
+            submitBtn.disabled = true;
+            submitBtn.textContent = "{% trans 'Submitting…' %}";
+
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": famsGetCookie("csrftoken"),
+                    "HX-Request": "true",
+                },
+                body: fd,
+            })
+                .then(function (resp) {
+                    var redirect = resp.headers.get("HX-Redirect");
+                    if (redirect) {
+                        window.location.href = redirect;
+                        return null;
+                    }
+                    return resp.text();
+                })
+                .then(function (html) {
+                    if (html === null) return;
+                    document.getElementById("attendance-activity-container").innerHTML = html;
+                })
+                .catch(function () {
+                    alert("{% trans 'Something went wrong while submitting attendance. Please try again.' %}");
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "{% trans 'Submit' %}";
+                });
+        };
+    })();
+</script>
