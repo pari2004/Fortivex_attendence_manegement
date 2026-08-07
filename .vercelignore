@@ -1,0 +1,11 @@
+venv/
+media/
+docs/
+.env
+.env.dist
+.env.example
+*.pyc
+__pycache__/
+.git/
+.pytest_cache/
+node_modules/
