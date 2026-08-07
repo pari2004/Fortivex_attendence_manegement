@@ -71,6 +71,7 @@ INSTALLED_APPS = [
     "onboarding",
     "asset",
     "attendance",
+    "daily_report",
     "payroll",
     "accessibility",
     "horilla_audit",
@@ -334,6 +335,7 @@ TWO_FACTORS_AUTHENTICATION = False
 SIDEBARS = [
     "employee",
     "attendance",
+    "daily_report",
     "leave",
     "payroll",
     "recruitment",
@@ -356,6 +358,23 @@ AUDITLOG_EXCLUDE_TRACKING_MODELS = (
 )
 
 EMAIL_BACKEND = "base.backends.ConfiguredEmailBackend"
+
+# ========================================
+# SMTP / OUTGOING EMAIL (env-var driven)
+# ========================================
+# These are the fallback used whenever no per-company DynamicEmailConfiguration
+# row exists (see base/backends.py). Values come from the environment only —
+# never hardcode credentials here. Missing/blank SMTP_HOST or SMTP_PASSWORD is
+# expected in environments where email hasn't been configured yet; sends will
+# fail silently and be logged (EMAIL_FAIL_SILENTLY below + base/backends.py),
+# not crash the app.
+EMAIL_HOST = env("SMTP_HOST", default="") or None
+EMAIL_PORT = env.int("SMTP_PORT", default=587)
+EMAIL_HOST_USER = env("SMTP_USERNAME", default="") or None
+EMAIL_HOST_PASSWORD = env("SMTP_PASSWORD", default="") or None
+EMAIL_USE_TLS = env.bool("SMTP_USE_TLS", default=True)
+DEFAULT_FROM_EMAIL = env("SMTP_FROM", default="no-reply@example.com")
+EMAIL_FAIL_SILENTLY = True
 
 """
 DB_INIT_PASSWORD: str

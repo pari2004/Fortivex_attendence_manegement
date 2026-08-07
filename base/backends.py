@@ -197,7 +197,22 @@ if EMAIL_BACKEND and EMAIL_BACKEND != default:
 class ConfiguredEmailBackend(BACKEND_CLASS):
 
     def send_messages(self, email_messages):
-        response = super(BACKEND_CLASS, self).send_messages(email_messages)
+        try:
+            response = super(BACKEND_CLASS, self).send_messages(email_messages)
+        except Exception:
+            logger.exception(
+                "SMTP send failed (host=%s); continuing without raising.",
+                getattr(self, "host", None),
+            )
+            response = None
+
+        if not response:
+            logger.warning(
+                "Email not sent to %s (subject=%r) — check SMTP configuration.",
+                [m.to for m in email_messages],
+                email_messages[0].subject if email_messages else "",
+            )
+
         for message in email_messages:
             from_email = (
                 self.dynamic_from_email_with_display_name
