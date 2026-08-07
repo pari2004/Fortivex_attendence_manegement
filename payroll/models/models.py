@@ -489,7 +489,16 @@ class Contract(HorillaModel):
                 wage_int = int(self.wage)
                 work_info = self.employee_id.employee_work_info
                 work_info.basic_salary = wage_int
-                work_info.save()
+                # work_info can be the same in-memory instance that's still
+                # mid-save (e.g. when this Contract is being auto-created
+                # from EmployeeWorkInformation's own pre_save signal, before
+                # it has been inserted). Saving it here would reenter that
+                # same save and race the outer INSERT for the same pk.
+                # Only persist standalone when it's already a saved row —
+                # otherwise the mutated attribute rides along with the
+                # in-flight outer save.
+                if work_info.pk is not None:
+                    work_info.save()
             except ValueError:
                 logger.error((f"Failed to convert wage '{self.wage}' to an integer."))
             except Exception as e:
