@@ -1,0 +1,20 @@
+{% load i18n widget_tweaks %}
+<form
+    hx-post="{{ request.path }}"
+    hx-target="#dailyReportModalBody"
+>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form.visible_fields %}
+        <div class="oh-input-group">
+            <label class="oh-label" for="id_{{ field.name }}">{{ field.label }}</label>
+            {{ field|add_class:"form-control" }}
+            {{ field.errors }}
+        </div>
+    {% endfor %}
+    <div class="oh-modal__dialog-footer p-0 mt-3">
+        <button type="submit" class="oh-btn oh-btn--secondary oh-btn--shadow">
+            {% trans "Save" %}
+        </button>
+    </div>
+</form>

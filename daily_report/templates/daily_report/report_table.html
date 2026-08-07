@@ -1,0 +1,55 @@
+{% load i18n %}
+<div class="overflow-x-auto">
+    <table class="table w-full mt-3 mb-5">
+        <thead>
+            <tr class="text-left">
+                <th>{% trans "Date" %}</th>
+                {% if show_employee_column %}
+                    <th>{% trans "Employee" %}</th>
+                {% endif %}
+                <th>{% trans "Report" %}</th>
+                <th>{% trans "Actions" %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for report in reports %}
+                <tr>
+                    <td class="whitespace-nowrap">{{ report.report_date }}</td>
+                    {% if show_employee_column %}
+                        <td class="whitespace-nowrap">{{ report.employee_id }}</td>
+                    {% endif %}
+                    <td title="{{ report.report }}">
+                        {{ report.report|truncatewords:20 }}
+                    </td>
+                    <td class="whitespace-nowrap">
+                        {% if report.can_edit %}
+                            <button
+                                class="oh-btn oh-btn--light-bkg oh-btn--sm"
+                                data-toggle="oh-modal-toggle"
+                                data-target="#dailyReportModal"
+                                hx-get="{% url 'daily-report-update' report.pk %}"
+                                hx-target="#dailyReportModalBody"
+                            >
+                                <ion-icon name="create-outline"></ion-icon>
+                            </button>
+                            <button
+                                class="oh-btn oh-btn--light-bkg oh-btn--sm"
+                                hx-post="{% url 'daily-report-delete' report.pk %}"
+                                hx-confirm="{% trans 'Delete this daily report?' %}"
+                                hx-target="#dailyReportTableContainer"
+                            >
+                                <ion-icon name="trash-outline"></ion-icon>
+                            </button>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted py-4">
+                        {% trans "No daily reports yet." %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

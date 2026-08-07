@@ -1,0 +1,35 @@
+{% extends "index.html" %}
+{% load i18n %}
+{% block content %}
+<div class="p-4">
+    <div class="flex items-center justify-between mb-4">
+        <h1 class="text-2xl font-bold">{% trans "Daily Reports" %}</h1>
+        <button
+            class="oh-btn oh-btn--secondary"
+            data-toggle="oh-modal-toggle"
+            data-target="#dailyReportModal"
+            hx-get="{% url 'daily-report-create' %}"
+            hx-target="#dailyReportModalBody"
+        >
+            <ion-icon name="add-outline" class="me-1"></ion-icon>
+            {% trans "Add Report" %}
+        </button>
+    </div>
+
+    <div id="dailyReportTableContainer">
+        {% include "daily_report/report_table.html" %}
+    </div>
+</div>
+
+<div class="oh-modal" id="dailyReportModal" role="dialog" aria-labelledby="dailyReportModal" aria-hidden="true">
+    <div class="oh-modal__dialog">
+        <div class="oh-modal__dialog-header">
+            <h2 class="oh-modal__dialog-title">{% trans "Daily Report" %}</h2>
+            <button class="oh-modal__close" aria-label="{% trans 'Close' %}">
+                <ion-icon name="close-outline"></ion-icon>
+            </button>
+        </div>
+        <div class="oh-modal__dialog-body" id="dailyReportModalBody"></div>
+    </div>
+</div>
+{% endblock content %}
