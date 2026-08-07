@@ -1,5 +1,6 @@
 import calendar
 import datetime as dt
+import os
 import sys
 from datetime import datetime, timedelta
 
@@ -48,12 +49,14 @@ def candidate_convert():
     ).update(converted=True)
 
 
-if not any(
+if "VERCEL" not in os.environ and not any(
     cmd in sys.argv
     for cmd in ["makemigrations", "migrate", "compilemessages", "flush", "shell"]
 ):
     """
     Initializes and starts background tasks using APScheduler when the server is running.
+    Skipped on serverless platforms (Vercel), which tear the process down
+    between requests - the scheduler would never get a chance to fire.
     """
     scheduler = BackgroundScheduler()
     scheduler.add_job(candidate_convert, "interval", minutes=5)

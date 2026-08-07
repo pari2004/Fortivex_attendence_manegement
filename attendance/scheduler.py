@@ -1,4 +1,5 @@
 import datetime
+import os
 import sys
 from datetime import timedelta
 
@@ -101,12 +102,14 @@ def create_work_record():
             logger.error(f"Failed to bulk create work records: {e}")
 
 
-if not any(
+if "VERCEL" not in os.environ and not any(
     cmd in sys.argv
     for cmd in ["makemigrations", "migrate", "compilemessages", "flush", "shell"]
 ):
     """
     Initializes and starts background tasks using APScheduler when the server is running.
+    Skipped on serverless platforms (Vercel), which tear the process down
+    between requests - the scheduler would never get a chance to fire.
     """
     scheduler = BackgroundScheduler(timezone=pytz.timezone(settings.TIME_ZONE))
 

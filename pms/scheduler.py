@@ -1,3 +1,5 @@
+import os
+import sys
 from datetime import datetime, timedelta
 
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -37,11 +39,15 @@ def cyclic_feedback_creation():
     return
 
 
-scheduler = BackgroundScheduler()
-cron_trigger = CronTrigger(hour=8)
-grace_time_seconds = int(timedelta(days=1).total_seconds())
-scheduler.add_job(
-    cyclic_feedback_creation, cron_trigger, misfire_grace_time=grace_time_seconds
-)
+if "VERCEL" not in os.environ and not any(
+    cmd in sys.argv
+    for cmd in ["makemigrations", "migrate", "compilemessages", "flush", "shell"]
+):
+    scheduler = BackgroundScheduler()
+    cron_trigger = CronTrigger(hour=8)
+    grace_time_seconds = int(timedelta(days=1).total_seconds())
+    scheduler.add_job(
+        cyclic_feedback_creation, cron_trigger, misfire_grace_time=grace_time_seconds
+    )
 
-scheduler.start()
+    scheduler.start()

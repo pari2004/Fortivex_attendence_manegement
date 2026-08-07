@@ -5,6 +5,7 @@ This module is used to register scheduled tasks
 """
 
 import json
+import os
 import sys
 from datetime import date, timedelta
 
@@ -138,7 +139,7 @@ def auto_payslip_generate():
                 generate_payslip(date=date.today(), companies=companies, all=False)
 
 
-if not any(
+if "VERCEL" not in os.environ and not any(
     cmd in sys.argv
     for cmd in ["makemigrations", "migrate", "compilemessages", "flush", "shell"]
 ):

@@ -1,4 +1,5 @@
 import calendar
+import os
 import sys
 from datetime import date, datetime, timedelta
 
@@ -458,10 +459,13 @@ def sync_roster_shifts():
             pass
 
 
-if not any(
+if "VERCEL" not in os.environ and not any(
     cmd in sys.argv
     for cmd in ["makemigrations", "migrate", "compilemessages", "flush", "shell"]
 ):
+    # Serverless platforms (Vercel) tear the process down between requests,
+    # so an in-process interval scheduler never gets a chance to fire - skip
+    # starting it there instead of leaking a scheduler every cold start.
     scheduler = BackgroundScheduler()
 
     # Add jobs with next_run_time set to the end of the previous job

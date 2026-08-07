@@ -4,6 +4,7 @@ scheduler.py
 This module is used to register scheduled tasks
 """
 
+import os
 import sys
 from datetime import date, timedelta
 
@@ -106,7 +107,7 @@ def notify_expiring_documents():
                 document.is_active = False
 
 
-if not any(
+if "VERCEL" not in os.environ and not any(
     cmd in sys.argv
     for cmd in ["makemigrations", "migrate", "compilemessages", "flush", "shell"]
 ):

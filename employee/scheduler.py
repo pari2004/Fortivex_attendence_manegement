@@ -1,3 +1,4 @@
+import os
 import sys
 from datetime import date, datetime, time, timedelta
 
@@ -98,7 +99,7 @@ def block_unblock_disciplinary():
                 HorillaUser.objects.filter(id__in=user_ids).update(is_active=active)
 
 
-if not any(
+if "VERCEL" not in os.environ and not any(
     cmd in sys.argv
     for cmd in ["makemigrations", "migrate", "compilemessages", "flush", "shell"]
 ):

@@ -139,6 +139,9 @@ else:
         """
         Start the scheduler
         """
+        if "VERCEL" in os.environ:
+            logger.warning("Skipping backup scheduler on serverless (Vercel).")
+            return
         if not BACKUP_CRON_TIMES:
             logger.warning("BACKUP_CRON_TIMES not set. Scheduler is disabled.")
             return
