@@ -2,14 +2,98 @@
 name = "fams"
 version = "0.1.0"
 requires-python = ">=3.12"
-dynamic = ["dependencies"]
+# Keep this list in sync with requirements.txt. Vercel resolves
+# dependencies from pyproject.toml (via `uv lock`) once this file
+# exists, rather than from requirements.txt.
+dependencies = [
+  "APScheduler",
+  "arabic-reshaper",
+  "asgiref",
+  "asn1crypto",
+  "bs4",
+  "bleach",
+  "certifi",
+  "cffi",
+  "chardet",
+  "charset-normalizer",
+  "click",
+  "cryptography",
+  "cssselect2",
+  "Django==5.2",
+  "django-auditlog",
+  "django-apscheduler",
+  "django-cors-headers",
+  "django-environ",
+  "django-filter",
+  "django-import-export",
+  "django-jsonfield",
+  "django-mathfilters",
+  "django-microsoft-auth",
+  "django-model-utils",
+  "django-redis==5.4.0",
+  "django-simple-history",
+  "django-widget-tweaks",
+  "djangorestframework",
+  "djangorestframework-simplejwt",
+  "drf-yasg",
+  "et-xmlfile",
+  "geopy",
+  "google-api-python-client",
+  "google-auth-oauthlib",
+  "google-cloud-storage==3.0.0",
+  "html5lib",
+  "Jinja2",
+  "idna",
+  "lxml",
+  "numpy",
+  "oauthlib",
+  "openpyxl",
+  "oscrypto",
+  "pandas",
+  "pdfkit",
+  "pillow",
+  "pycparser",
+  "pyHanko",
+  "pyhanko-certvalidator",
+  "PyMuPDF",
+  "pypdf",
+  "pypng",
+  "python-bidi",
+  "python-dateutil",
+  "pytz",
+  "PyYAML",
+  "pyzk==0.9",
+  "qrcode",
+  "reportlab==4.0.9",
+  "requests",
+  "responses",
+  "setuptools",
+  "six",
+  "sqlparse",
+  "svglib",
+  "swapper",
+  "tinycss2",
+  "typing_extensions",
+  "tzdata",
+  "tzlocal",
+  "uritools",
+  "urllib3",
+  "utils",
+  "webencodings",
+  "xhtml2pdf",
+  "XlsxWriter",
+  "gunicorn",
+  "psycopg2-binary",
+  "whitenoise",
+  "django-storages",
+]
 
-[tool.setuptools.dynamic]
-dependencies = { file = ["requirements.txt"] }
-
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+[tool.uv]
+# This is a Django app, not an installable library - don't try to
+# build/install it as a package (avoids setuptools package discovery
+# entirely, which fails on this repo's flat layout of ~30 top-level
+# Django app directories).
+package = false
 
 [tool.vercel.scripts]
 build = "python vercel_build_hook.py"
