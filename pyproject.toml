@@ -1,2 +1,15 @@
+[project]
+name = "fams"
+version = "0.1.0"
+requires-python = ">=3.12"
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [tool.vercel.scripts]
 build = "python vercel_build_hook.py"
