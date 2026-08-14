@@ -166,3 +166,7 @@ CLAUDE.md
 
 .vercel
 .env*
+
+# pip HTTP download cache (accidentally committed in the initial commit -
+# ~105MB of cached wheel downloads that bloated every Vercel deploy)
+.pip-cache/
