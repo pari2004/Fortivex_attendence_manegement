@@ -11,7 +11,12 @@ if env("AWS_ACCESS_KEY_ID", default=None):
     AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY = env("AWS_SECRET_ACCESS_KEY")
     AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME")
-    AWS_S3_REGION_NAME = env("AWS_S3_REGION_NAME", default=None)
+    # AWS_REGION is the generic/AWS-CLI-standard var name; AWS_S3_REGION_NAME
+    # is what django-storages actually reads. Accept either so this doesn't
+    # break depending on which one ends up set in a given environment.
+    AWS_S3_REGION_NAME = env(
+        "AWS_S3_REGION_NAME", default=env("AWS_REGION", default="us-east-1")
+    )
     DEFAULT_FILE_STORAGE = env(
         "DEFAULT_FILE_STORAGE",
         default="horilla.horilla_backends.PrivateMediaStorage",
@@ -26,3 +31,14 @@ if env("AWS_ACCESS_KEY_ID", default=None):
 # ACL with signed URLs, so it never reads Django's global MEDIA_URL/MEDIA_ROOT
 # to build file URLs - and other code (e.g. horilla_views' PDF media-path
 # resolution) assumes MEDIA_ROOT is a real local directory it can read from.
+
+# ========================================
+# AWS Cognito (reserved for the upcoming SSO login integration)
+# ========================================
+# Not wired into any auth backend or view yet - that still needs the Hosted
+# UI domain and a deliberate rollout plan. These are declared here only so
+# their presence/absence in the environment can never crash settings import
+# (and therefore collectstatic/manage.py) once that work starts.
+COGNITO_REGION = env("COGNITO_REGION", default=None)
+COGNITO_USER_POOL_ID = env("COGNITO_USER_POOL_ID", default=None)
+COGNITO_CLIENT_ID = env("COGNITO_CLIENT_ID", default=None)
