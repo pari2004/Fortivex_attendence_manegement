@@ -35,7 +35,7 @@ def url(self: FieldFile):
     try:
         self._require_file()
     except Exception as e:
-        return reverse("404")
+        return ""
     return self.storage.url(self.name)
 
 

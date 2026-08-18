@@ -9,6 +9,7 @@ of site-packages to keep the function under Vercel's 225MB bundle limit.
 import shutil
 from pathlib import Path
 
+import botocore
 import googleapiclient
 
 # googleapiclient.__file__ is <site-packages>/googleapiclient/__init__.py,
@@ -38,6 +39,18 @@ remove(
     site_packages / "googleapiclient" / "discovery_cache" / "documents",
     "googleapiclient discovery_cache/documents",
 )
+
+# botocore ships per-service API definitions (service-2.json, paginators,
+# waiters, examples) for every AWS service it knows about - EC2, Lambda,
+# RDS, SageMaker, etc. - about 80MB, even though this project only talks
+# to S3. Removing the service directories we don't use is safe: boto3
+# only loads the model for a service when a client/resource for it is
+# constructed, and this app only ever constructs an s3 client (via
+# django-storages' S3Boto3Storage).
+botocore_data = Path(botocore.__file__).parent / "data"
+for service_dir in botocore_data.iterdir():
+    if service_dir.is_dir() and service_dir.name not in ("s3", "s3control"):
+        remove(service_dir, f"botocore data/{service_dir.name}")
 
 # pip/setuptools/pkg_resources/wheel are packaging/build tooling, not
 # runtime dependencies. The install step that needs them has already run
