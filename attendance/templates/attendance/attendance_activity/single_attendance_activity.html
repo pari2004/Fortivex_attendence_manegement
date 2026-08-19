@@ -119,6 +119,42 @@
                     <span class="oh-timeoff-modal__stat-count">{{ attendance.work_type_id }}</span>
                 </div>
             </div>
+
+            {% if activity.clock_in_selfie or activity.clock_out_selfie %}
+            <div class="oh-timeoff-modal__stats-container mt-3 mb-3" style="align-items: flex-start;">
+                {% if activity.clock_in_selfie %}
+                <div class="oh-timeoff-modal__stat" style="flex: 1;">
+                    <span class="oh-timeoff-modal__stat-title">{% trans "Check-In Evidence" %}</span>
+                    <a href="{{ activity.clock_in_selfie.url }}" target="_blank">
+                        <img src="{{ activity.clock_in_selfie.url }}" style="max-width: 100%; border-radius: 8px; margin-top: 8px; height: 120px; object-fit: cover;" alt="Check-In Selfie" />
+                    </a>
+                    {% if activity.clock_in_latitude and activity.clock_in_longitude %}
+                    <div style="margin-top: 8px;">
+                        <a href="https://www.google.com/maps?q={{ activity.clock_in_latitude }},{{ activity.clock_in_longitude }}" target="_blank" class="oh-btn oh-btn--small oh-btn--secondary" style="padding: 5px; width: 100%;">
+                            <ion-icon name="location-outline"></ion-icon> {% trans "View Map" %}
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                {% if activity.clock_out_selfie %}
+                <div class="oh-timeoff-modal__stat" style="flex: 1; {% if activity.clock_in_selfie %}margin-left: 20px;{% endif %}">
+                    <span class="oh-timeoff-modal__stat-title">{% trans "Check-Out Evidence" %}</span>
+                    <a href="{{ activity.clock_out_selfie.url }}" target="_blank">
+                        <img src="{{ activity.clock_out_selfie.url }}" style="max-width: 100%; border-radius: 8px; margin-top: 8px; height: 120px; object-fit: cover;" alt="Check-Out Selfie" />
+                    </a>
+                    {% if activity.clock_out_latitude and activity.clock_out_longitude %}
+                    <div style="margin-top: 8px;">
+                        <a href="https://www.google.com/maps?q={{ activity.clock_out_latitude }},{{ activity.clock_out_longitude }}" target="_blank" class="oh-btn oh-btn--small oh-btn--secondary" style="padding: 5px; width: 100%;">
+                            <ion-icon name="location-outline"></ion-icon> {% trans "View Map" %}
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
             {% if perms.attendance.delete_attendanceactivity %}
                 <div class="oh-modal__button-container text-center w-100">
                     <div class="oh-btn-group">
