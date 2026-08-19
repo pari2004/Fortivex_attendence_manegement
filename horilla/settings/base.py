@@ -365,7 +365,7 @@ AUDITLOG_EXCLUDE_TRACKING_MODELS = (
     # "<app_name>.<model>"
 )
 
-EMAIL_BACKEND = "base.backends.ConfiguredEmailBackend"
+EMAIL_BACKEND = env("EMAIL_BACKEND", default="base.backends.ConfiguredEmailBackend")
 
 # ========================================
 # SMTP / OUTGOING EMAIL (env-var driven)
