@@ -5,7 +5,7 @@ Imported from horilla.settings.__init__ after base.py. Client overrides belong
 in local_settings.py (imported after this module) — do not import them here.
 """
 
-from .base import INSTALLED_APPS, env
+from .base import INSTALLED_APPS, env, STORAGES
 
 if env("AWS_ACCESS_KEY_ID", default=None):
     AWS_ACCESS_KEY_ID = env("AWS_ACCESS_KEY_ID")
@@ -17,7 +17,7 @@ if env("AWS_ACCESS_KEY_ID", default=None):
     AWS_S3_REGION_NAME = env(
         "AWS_S3_REGION_NAME", default=env("AWS_REGION", default="us-east-1")
     )
-    DEFAULT_FILE_STORAGE = env(
+    STORAGES["default"]["BACKEND"] = env(
         "DEFAULT_FILE_STORAGE",
         default="horilla.horilla_backends.PrivateMediaStorage",
     )
