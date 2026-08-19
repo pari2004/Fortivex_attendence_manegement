@@ -164,6 +164,7 @@ ROOT_URLCONF = "horilla.urls"
 # ========================================
 if env("DATABASE_URL", default=None):
     DATABASES = {"default": env.db()}
+    DATABASES["default"]["CONN_MAX_AGE"] = 60
 else:
     DATABASES = {
         "default": {
