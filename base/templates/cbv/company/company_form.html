@@ -34,13 +34,18 @@
         </div>
         <div class="oh-modal__dialog-body">
             <div class="oh-profile-section__image-container" id="companyIconFieldContainer">
-                <div class="oh-profile-section__modal-avatar" style="border: 1px solid hsl(213, 22%, 84%)">
+                <div class="oh-profile-section__modal-avatar" style="border: 1px solid hsl(213, 22%, 84%); max-height: 400px; width: 100%; display: flex; justify-content: center; align-items: center;">
                     <img
+                        id="companyImageToCrop"
                         src="{% if form.instance.icon %}{{ form.instance.icon.url }}{% else %}{% static 'images/ui/auth-logo.png' %}{% endif %}"
-                        class="oh-profile-section__modal-image preview"
+                        class="preview"
+                        style="max-width: 100%; max-height: 100%;"
                         alt="{% trans 'Company logo' %}"
                     >
                 </div>
+            </div>
+            <div class="d-flex justify-content-end mt-4">
+                <button type="button" id="cropCompanyIconBtn" class="oh-btn oh-btn--secondary oh-btn--small w-100" style="display: none;">{% trans "Crop & Save" %}</button>
             </div>
         </div>
     </div>
@@ -50,12 +55,25 @@
     #id_icon_parent_div {
         display: none !important;
     }
+    /* Make the crop box circular */
+    .cropper-view-box,
+    .cropper-face {
+      border-radius: 50%;
+    }
+    /* The cropper image needs to fit inside the container */
+    .cropper-container {
+        width: 100% !important;
+    }
 </style>
 
 {% include "generic/horilla_form.html" %}
 
 <script>
     (function () {
+        var cropper = null;
+        var image = document.getElementById('companyImageToCrop');
+        var cropBtn = document.getElementById('cropCompanyIconBtn');
+
         function initCompanyIconField() {
             var iconInput = document.getElementById("id_icon");
             var fieldContainer = document.getElementById("companyIconFieldContainer");
@@ -75,38 +93,70 @@
 
             if (iconInput.parentElement !== fieldContainer) {
                 fieldContainer.appendChild(iconInput);
-                // The field now lives outside <form> in the DOM (inside the popup),
-                // so associate it back to the form explicitly to keep it submitting.
                 if (formEl && formEl.id) {
                     iconInput.setAttribute("form", formEl.id);
                 }
             }
             iconInput.classList.add("oh-input", "oh-input--file", "oh-input--file-sm", "mt-4");
-            // Browsers silently refuse to submit a required field that sits inside a
-            // display:none ancestor (the closed popup) with no visible error at all.
-            // Server-side validation (clean_icon / required=True) still runs on submit.
             iconInput.required = false;
 
-            // A failed clean_icon() (bad extension/size) attaches its error to the
-            // now-hidden original field row. Move it into the popup and reopen it
-            // so the user can actually see why the upload was rejected.
             if (errorList) {
                 fieldContainer.appendChild(errorList);
                 modal.classList.add("oh-modal--show");
             }
 
-            iconInput.addEventListener("change", function () {
-                var file = this.files[0];
+            iconInput.addEventListener("change", function (e) {
+                var file = e.target.files[0];
                 if (!file) {
                     return;
                 }
                 var reader = new FileReader();
                 reader.addEventListener("load", function () {
-                    document.querySelectorAll(".preview").forEach(function (img) {
-                        img.src = reader.result;
+                    // Destroy previous cropper if exists
+                    if (cropper) {
+                        cropper.destroy();
+                    }
+                    image.src = reader.result;
+                    // Initialize cropper
+                    cropper = new Cropper(image, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        background: false,
                     });
+                    cropBtn.style.display = 'block';
                 });
                 reader.readAsDataURL(file);
+            });
+
+            // Handle Crop & Save
+            cropBtn.addEventListener('click', function() {
+                if (!cropper) return;
+                
+                // Get cropped canvas
+                var canvas = cropper.getCroppedCanvas({
+                    width: 400,
+                    height: 400,
+                });
+                
+                canvas.toBlob(function(blob) {
+                    // Create a new file from the blob
+                    var fileName = iconInput.files[0] ? iconInput.files[0].name : 'logo.png';
+                    var file = new File([blob], fileName, { type: 'image/png', lastModified: new Date().getTime() });
+                    
+                    // Create a new DataTransfer object to assign the file to the input
+                    var container = new DataTransfer();
+                    container.items.add(file);
+                    iconInput.files = container.files;
+                    
+                    // Update main UI preview (not the modal one)
+                    var mainPreview = document.querySelector('.oh-profile-section__edit-photo .preview');
+                    if (mainPreview) {
+                        mainPreview.src = canvas.toDataURL('image/png');
+                    }
+                    
+                    // Close the modal
+                    $('#companyIconModal').removeClass('oh-modal--show');
+                }, 'image/png');
             });
         }
         initCompanyIconField();

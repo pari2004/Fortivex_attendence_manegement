@@ -56,14 +56,19 @@
                         <div class="oh-modal__dialog-body">
                             <div class="oh-profile-section__image-container">
                                 {% csrf_token %}
-                                <div class="oh-profile-section__modal-avatar">
+                                <div class="oh-profile-section__modal-avatar" style="max-height: 400px; width: 100%; display: flex; justify-content: center; align-items: center;">
                                     <img
+                                        id="employeeImageToCrop"
                                         src="https://ui-avatars.com/api/?name=N+P&background=random"
-                                        class="oh-profile-section__modal-image preview"
+                                        class="preview"
+                                        style="max-width: 100%; max-height: 100%;"
                                         alt="{% trans 'Employee' %}"
                                     >
                                 </div>
                                 {{ form.employee_profile }}
+                            </div>
+                            <div class="d-flex justify-content-end mt-4">
+                                <button type="button" id="cropEmployeeIconBtn" class="oh-btn oh-btn--secondary oh-btn--small w-100" style="display: none;">{% trans "Crop & Save" %}</button>
                             </div>
                         </div>
                     </div>
@@ -101,17 +106,51 @@
 </div>
 <script>
     $(document).ready(function () {
-      $('#id_employee_profile').change(function (e) {
+      var cropper = null;
+      var image = document.getElementById('employeeImageToCrop');
+      var cropBtn = document.getElementById('cropEmployeeIconBtn');
+      var iconInput = document.getElementById('id_employee_profile');
+      
+      if (iconInput) {
+          iconInput.classList.add("oh-input", "oh-input--file", "oh-input--file-sm", "mt-4");
+      }
 
+      $('#id_employee_profile').change(function (e) {
         const file = this.files[0];
+        if (!file) return;
         const reader = new FileReader();
 
         reader.addEventListener("load", function() {
-          const imageUrl = reader.result;
-          $(".preview").attr("src", imageUrl);
+          if (cropper) { cropper.destroy(); }
+          image.src = reader.result;
+          cropper = new Cropper(image, {
+              aspectRatio: 1,
+              viewMode: 1,
+              background: false,
+          });
+          if (cropBtn) cropBtn.style.display = 'block';
         });
 
         reader.readAsDataURL(file);
       });
+      
+      if (cropBtn) {
+          $(cropBtn).click(function() {
+              if (!cropper) return;
+              var canvas = cropper.getCroppedCanvas({ width: 400, height: 400 });
+              canvas.toBlob(function(blob) {
+                  var fileName = iconInput.files[0] ? iconInput.files[0].name : 'profile.png';
+                  var file = new File([blob], fileName, { type: 'image/png', lastModified: new Date().getTime() });
+                  var container = new DataTransfer();
+                  container.items.add(file);
+                  iconInput.files = container.files;
+                  
+                  var mainPreview = document.querySelector('.oh-profile-section__edit-photo .preview');
+                  if (mainPreview) { mainPreview.src = canvas.toDataURL('image/png'); }
+                  
+                  $('#uploadPhotoModal').removeClass('oh-modal--show');
+              }, 'image/png');
+          });
+      }
     });
 </script>
