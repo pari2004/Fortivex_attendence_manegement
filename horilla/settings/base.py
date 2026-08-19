@@ -205,10 +205,7 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-        "OPTIONS": {
-            "manifest_strict": False,
-        },
+        "BACKEND": "horilla.custom_storages.NonStrictWhiteNoiseStorage",
     },
 }
 
