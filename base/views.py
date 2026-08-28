@@ -8620,5 +8620,25 @@ def calendar_events_api(request):
         # Ignore Google errors if not connected or API fails
         pass
 
+    # 4. Inject Sundays as Government Holiday (Red)
+    try:
+        start_str = request.GET.get('start')
+        end_str = request.GET.get('end')
+        if start_str and end_str:
+            s_date = datetime.datetime.fromisoformat(start_str[:10]).date()
+            e_date = datetime.datetime.fromisoformat(end_str[:10]).date()
+            delta = e_date - s_date
+            for i in range(delta.days + 1):
+                day = s_date + datetime.timedelta(days=i)
+                if day.weekday() == 6: # Sunday
+                    events.append({
+                        "title": "Government Holiday",
+                        "start": day.isoformat(),
+                        "color": "#e74c3c", # Red
+                        "allDay": True
+                    })
+    except Exception:
+        pass
+
     return JsonResponse(events, safe=False)
 
