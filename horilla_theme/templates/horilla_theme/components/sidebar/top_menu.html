@@ -24,3 +24,24 @@
         aria-hidden="true"
     >{% trans "Dashboard" %}</span>
 </a>
+
+<a
+    href="{% url 'company-calendar' %}"
+    class="sideboxmain group flex items-center gap-3 px-3 py-2.5 rounded-lg w-full transition duration-300"
+    data-menu="Calendar"
+    hx-get="{% url 'company-calendar' %}"
+    hx-target="#ohMainContent"
+    hx-select="#ohMainContent > *"
+    hx-swap="innerHTML show:window:top"
+    hx-push-url="true"
+>
+    <ion-icon
+        name="calendar-outline"
+        class="w-4.5 h-4.5 flex-shrink-0 transition duration-300 group-hover:filter group-hover:brightness-0 group-hover:invert"
+        style="font-size: 1.125rem;"
+    ></ion-icon>
+    <span
+        class="oh-sidebar-label text-sm font-medium truncate flex-1 text-left"
+        aria-hidden="true"
+    >{% trans "Calendar" %}</span>
+</a>

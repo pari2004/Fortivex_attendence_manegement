@@ -67,6 +67,8 @@ from horilla_audit.models import AuditTag
 urlpatterns = [
     path("", views.home, name="home-page"),
     path("dashboard/", dashboard_module.main_dashboard_view, name="dashboard"),
+    path("calendar/", views.company_calendar_view, name="company-calendar"),
+    path("calendar/events/", views.calendar_events_api, name="calendar-events-api"),
     path(
         "dashboard/api/kpi/",
         dashboard_module.dashboard_kpi_data,

@@ -130,3 +130,9 @@
         }
     </script>
 {% endif %}
+
+{% if request.META.HTTP_HX_REQUEST %}
+<div class="relative dropdown-wrapper" id="profile-section-container" hx-swap-oob="true">
+    {% include "base/navbar_components/profile_section.html" %}
+</div>
+{% endif %}

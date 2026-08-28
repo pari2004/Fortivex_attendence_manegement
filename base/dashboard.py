@@ -394,7 +394,7 @@ def dashboard_kpi_data(request):
             .distinct()
         )
         present_today = (
-            Attendance.objects.filter(attendance_date=today)
+            Attendance.objects.filter(attendance_date=real_today)
             .exclude(employee_id__in=leave_employee_ids)
             .values("employee_id")
             .distinct()

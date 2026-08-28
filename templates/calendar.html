@@ -1,0 +1,86 @@
+{% extends 'index.html' %}
+{% load i18n %}
+{% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+
+<div class="oh-wrapper">
+    <div class="oh-dashboard row">
+        <div class="col-12 col-sm-12 col-md-12 col-lg-12">
+            <div class="oh-card dashboard-stats">
+                <div class="oh-card__header d-flex justify-content-between align-items-center">
+                    <h5 class="oh-card__title">{% trans "Company Calendar" %}</h5>
+                    <div class="oh-btn-group">
+                        {% if not google_connected %}
+                        <a href="{% url 'authenticate-gmeet' %}" class="oh-btn oh-btn--primary oh-btn--small mb-2">
+                            <ion-icon name="logo-google" class="me-1"></ion-icon>{% trans "Connect Google Calendar" %}
+                        </a>
+                        {% endif %}
+                        {% if perms.base.add_holidays %}
+                        <a href="{% url 'holiday-creation' %}" class="oh-btn oh-btn--secondary oh-btn--small mb-2 ms-2">
+                            <ion-icon name="add-circle-outline" class="me-1"></ion-icon>{% trans "Add Custom Holiday" %}
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="oh-card__body">
+                    <div id="companyCalendar"></div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <h6>{% trans "Legend" %}</h6>
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center"><span style="width: 15px; height: 15px; background-color: #3498db; display: inline-block; margin-right: 5px;"></span> {% trans "Government Holidays" %}</div>
+                    <div class="d-flex align-items-center"><span style="width: 15px; height: 15px; background-color: #e74c3c; display: inline-block; margin-right: 5px;"></span> {% trans "Company Holidays" %}</div>
+                    <div class="d-flex align-items-center"><span style="width: 15px; height: 15px; background-color: #9b59b6; display: inline-block; margin-right: 5px;"></span> {% trans "Google Calendar Events" %}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var calendarEl = document.getElementById('companyCalendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            events: "{% url 'calendar-events-api' %}",
+            eventClick: function(info) {
+                if (info.event.url) {
+                    window.open(info.event.url, '_blank');
+                    info.jsEvent.preventDefault();
+                }
+            }
+        });
+        calendar.render();
+    });
+</script>
+
+<style>
+    #companyCalendar {
+        max-width: 100%;
+        margin: 0 auto;
+    }
+    /* Ensure the calendar uses the full card width and looks nice in the Horilla theme */
+    .fc-toolbar-title {
+        font-size: 1.25rem !important;
+        font-weight: 600;
+        color: var(--oh-color-text-dark);
+    }
+    .fc-button {
+        background-color: var(--oh-color-primary) !important;
+        border-color: var(--oh-color-primary) !important;
+        box-shadow: none !important;
+    }
+    .fc-button:hover {
+        background-color: var(--oh-color-primary-dark) !important;
+    }
+</style>
+
+{% endblock %}

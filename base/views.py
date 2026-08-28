@@ -8531,3 +8531,94 @@ def protected_media(request, path):
         filename = os.path.basename(media_path)
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
+
+
+@login_required
+def company_calendar_view(request):
+    google_connected = True
+    try:
+        from horilla_meet.methods import get_google_credentials
+        get_google_credentials(request)
+    except Exception:
+        google_connected = False
+    return render(request, "calendar.html", {"google_connected": google_connected})
+
+
+@login_required
+def calendar_events_api(request):
+    import datetime
+    import requests
+    from django.http import JsonResponse
+    from base.models import Holidays
+
+    events = []
+
+    # 1. Custom Company Holidays
+    try:
+        custom_holidays = Holidays.objects.all()
+        for h in custom_holidays:
+            events.append({
+                "title": h.name if hasattr(h, 'name') else "Holiday",
+                "start": h.start_date.isoformat() if h.start_date else None,
+                "end": (h.end_date + datetime.timedelta(days=1)).isoformat() if getattr(h, 'end_date', None) else None,
+                "color": "#e74c3c",  # Red
+                "allDay": True
+            })
+    except Exception:
+        pass
+
+    # 2. Government Holidays (via Nager.Date API for India)
+    current_year = datetime.date.today().year
+    try:
+        res = requests.get(f"https://date.nager.at/api/v3/PublicHolidays/{current_year}/IN", timeout=5)
+        if res.status_code == 200:
+            gov_holidays = res.json()
+            for gh in gov_holidays:
+                events.append({
+                    "title": gh.get("name", "Public Holiday"),
+                    "start": gh.get("date"),
+                    "color": "#3498db",  # Blue
+                    "allDay": True
+                })
+    except Exception:
+        pass
+
+    # 3. Google Calendar Events
+    try:
+        from horilla_meet.methods import get_google_credentials
+        from googleapiclient.discovery import build
+
+        creds = get_google_credentials(request)
+        service = build("calendar", "v3", credentials=creds)
+
+        start = request.GET.get('start')
+        end = request.GET.get('end')
+
+        time_min = start if start else (datetime.datetime.utcnow() - datetime.timedelta(days=30)).isoformat() + 'Z'
+        time_max = end if end else (datetime.datetime.utcnow() + datetime.timedelta(days=90)).isoformat() + 'Z'
+
+        events_result = service.events().list(
+            calendarId='primary',
+            timeMin=time_min,
+            timeMax=time_max,
+            singleEvents=True,
+            orderBy='startTime'
+        ).execute()
+
+        g_events = events_result.get('items', [])
+        for e in g_events:
+            start_time = e['start'].get('dateTime', e['start'].get('date'))
+            end_time = e['end'].get('dateTime', e['end'].get('date'))
+            events.append({
+                "title": e.get('summary', 'Busy'),
+                "start": start_time,
+                "end": end_time,
+                "color": "#9b59b6",  # Purple
+                "url": e.get('htmlLink', '')
+            })
+    except Exception:
+        # Ignore Google errors if not connected or API fails
+        pass
+
+    return JsonResponse(events, safe=False)
+
