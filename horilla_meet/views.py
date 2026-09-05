@@ -54,6 +54,9 @@ def google_authenticate(request):
     )
 
     request.session["oauth_state"] = state
+    if hasattr(flow, "code_verifier"):
+        request.session["code_verifier"] = flow.code_verifier
+
     return redirect(auth_url)
 
 
@@ -86,7 +89,15 @@ def google_auth_callback(request):
         redirect_uri=redirect_uri,
     )
 
-    flow.fetch_token(authorization_response=request.build_absolute_uri())
+    code_verifier = request.session.pop("code_verifier", None)
+    if code_verifier:
+        flow.code_verifier = code_verifier
+
+    try:
+        flow.fetch_token(authorization_response=request.build_absolute_uri())
+    except Exception as e:
+        messages.error(request, _("Google authentication failed: %(e)s") % {"e": e})
+        return redirect("gmeet-view")
 
     credentials = flow.credentials
     GoogleCredential.from_google_credentials(request.user.employee_get, credentials)
