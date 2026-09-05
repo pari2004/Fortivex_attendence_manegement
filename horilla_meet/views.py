@@ -27,8 +27,9 @@ def google_authenticate(request):
     ).first()
     if not cred:
         messages.error(request, _("Google Cloud Credential not found."))
-        return redirect("gmeet-view")
+        return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/calendar/"))
 
+    request.session["oauth_referrer"] = request.META.get("HTTP_REFERER", "/calendar/")
     redirect_uri = request.build_absolute_uri("/meet/auth-callback/")
     flow = Flow.from_client_config(
         {
@@ -97,13 +98,13 @@ def google_auth_callback(request):
         flow.fetch_token(authorization_response=request.build_absolute_uri())
     except Exception as e:
         messages.error(request, _("Google authentication failed: %(e)s") % {"e": e})
-        return redirect("gmeet-view")
+        return HttpResponseRedirect(request.session.pop("oauth_referrer", "/calendar/"))
 
     credentials = flow.credentials
     GoogleCredential.from_google_credentials(request.user.employee_get, credentials)
     messages.success(request, _("Successfully authenticated with Google credentials."))
 
-    return redirect("gmeet-view")
+    return HttpResponseRedirect(request.session.pop("oauth_referrer", "/calendar/"))
 
 
 @login_required
