@@ -42,17 +42,4 @@
 <script>
     toggleReimbursmentType($("#genericModalBody [name=type]").first());
     removeHighlight();
-    var attachemntLabelElement = $("#genericModalBody [for=id_attachment]");
-    var attachemntlElement = $("#genericModalBody #id_attachment");
-    var attachemntParentlElement = $(
-    	"#genericModalBody [for=id_attachment]"
-    ).parent();
-
-    // Detach both elements from the DOM
-    attachemntLabelElement.detach();
-    attachemntlElement.detach();
-    attachemntParentlElement.html("");
-    // Append them in the desired order
-    attachemntParentlElement.append(attachemntLabelElement);
-    attachemntParentlElement.append(attachemntlElement);
 </script>

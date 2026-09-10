@@ -127,10 +127,8 @@ class TimeSheetFilter(HorillaFilterSet):
         label=_("End Date Till"),
     )
 
-    project = (
-        django_filters.ModelChoiceFilter(
-            field_name="project_id", queryset=Project.objects.all()
-        ),
+    project = django_filters.ModelChoiceFilter(
+        field_name="project_id", queryset=Project.objects.all()
     )
 
     task = django_filters.ModelChoiceFilter(

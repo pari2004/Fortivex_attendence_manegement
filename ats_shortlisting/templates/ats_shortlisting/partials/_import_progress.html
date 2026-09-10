@@ -1,0 +1,22 @@
+{% load i18n %}
+<div id="ats-import-progress"
+     hx-get="{% url 'ats-tool-import-progress' run_id %}"
+     hx-trigger="load, every 700ms"
+     hx-swap="outerHTML">
+    <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+        <h2 class="font-medium text-gray-800 mb-2">{% trans "Import Report" %}</h2>
+        <div class="w-full bg-gray-100 rounded-full h-2.5 mb-2">
+            <div class="bg-red-600 h-2.5 rounded-full transition-all" style="width: {{ pct|default:0 }}%"></div>
+        </div>
+        <p class="text-sm text-gray-600">
+            {% if progress %}
+                {% trans "Processing" %} ({{ progress.processed|default:0 }}/{{ progress.total|default:0 }}): {{ progress.current_file|default:"starting" }}
+            {% else %}
+                {% trans "Starting import..." %}
+            {% endif %}
+        </p>
+    </div>
+    <div id="ats-dashboard-inner">
+        {% include "ats_shortlisting/partials/_dashboard.html" %}
+    </div>
+</div>

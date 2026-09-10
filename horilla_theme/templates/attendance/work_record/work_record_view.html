@@ -38,8 +38,8 @@
                                         {% trans "Filter" %}
                                     </div>
                                 </button>
-                                <div class="oh-filter-dropdown dropdown-content absolute z-10 bg-white rounded-lg [box-shadow:0px_0px_20px_0px_rgb(0_0_0_/_8%)] min-w-[400px] p-3 right-0">
-                                    <div class="accordion-wrapper space-y-2">
+                                <div class="oh-filter-dropdown dropdown-content absolute z-10 bg-white rounded-lg [box-shadow:0px_0px_20px_0px_rgb(0_0_0_/_8%)] min-w-[400px] right-0 flex flex-col max-h-[calc(100vh-140px)]">
+                                    <div class="oh-filter-dropdown__body accordion-wrapper space-y-2 overflow-y-auto p-3">
                                         {% include 'employee_filters.html' %}
                                         <div class="oh-accordion">
                                             <div class="oh-accordion-header">{% trans "Date Range" %}</div>
@@ -79,14 +79,14 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="oh-dropdown__filter-footer">
-                                            <button
-                                                class="oh-btn oh-btn--secondary oh-btn--small w-100 float-end"
-                                                id="employeeFilter"
-                                            >
-                                                {% trans "Filter" %}
-                                            </button>
-                                        </div>
+                                    </div>
+                                    <div class="oh-filter-dropdown__footer oh-dropdown__filter-footer p-3">
+                                        <button
+                                            class="oh-btn oh-btn--secondary oh-btn--small w-100 float-end"
+                                            id="employeeFilter"
+                                        >
+                                            {% trans "Filter" %}
+                                        </button>
                                     </div>
                                 </div>
                             </div>

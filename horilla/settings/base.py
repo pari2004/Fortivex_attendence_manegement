@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     "base",
     "employee",
     "recruitment",
+    "ats_shortlisting",
     "leave",
     "pms",
     "onboarding",

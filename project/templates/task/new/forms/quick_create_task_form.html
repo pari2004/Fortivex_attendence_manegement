@@ -18,6 +18,7 @@
 </form>
 <script>
     $(document).ready(function (e) {
+        $('#{{hx_target}}').removeClass('d-none');
         $('.oh-kanban__add-card-cancel-btn').click(function (e) {
             e.stopPropagation();
             $(this).closest('.oh-kanban__add-card-container').addClass('d-none');

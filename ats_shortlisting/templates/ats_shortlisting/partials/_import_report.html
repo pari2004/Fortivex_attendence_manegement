@@ -1,0 +1,44 @@
+{% load i18n %}
+{% if report %}
+<div class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+    <h2 class="font-medium text-gray-800 mb-2">{% trans "Import Report" %}</h2>
+    {% for warning in report.drive_warnings %}
+        <p class="text-sm text-amber-600">&#9888; {{ warning }}</p>
+    {% endfor %}
+    <p class="text-sm text-gray-600">
+        <strong>{% trans "Domain:" %}</strong> {{ report.domain }} &nbsp;|&nbsp;
+        <strong>{% trans "Total:" %}</strong> {{ report.total_files }} &nbsp;|&nbsp;
+        <strong>{% trans "Imported:" %}</strong> {{ report.counts.imported }} &nbsp;|&nbsp;
+        <strong>{% trans "Updated:" %}</strong> {{ report.counts.updated }} &nbsp;|&nbsp;
+        <strong>{% trans "Rescored:" %}</strong> {{ report.counts.rescored }} &nbsp;|&nbsp;
+        <strong>{% trans "Failed:" %}</strong> {{ report.counts.failed }}
+    </p>
+    {% if report.outcomes %}
+    <details class="mt-2">
+        <summary class="text-xs text-gray-500 cursor-pointer">{% trans "Per-file detail" %}</summary>
+        <table class="w-full text-xs mt-2">
+            <thead><tr class="text-left text-gray-500">
+                <th class="pr-3">{% trans "File" %}</th><th class="pr-3">{% trans "Status" %}</th>
+                <th class="pr-3">{% trans "ATS Score" %}</th><th>{% trans "Reason" %}</th>
+            </tr></thead>
+            <tbody>
+                {% for outcome in report.outcomes %}
+                <tr class="border-t border-gray-100">
+                    <td class="pr-3 py-1">{{ outcome.file_name }}</td>
+                    <td class="pr-3 py-1">{{ outcome.status }}</td>
+                    <td class="pr-3 py-1">{{ outcome.ats_score|default:"-" }}</td>
+                    <td class="py-1 text-gray-400">{{ outcome.reason }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </details>
+    {% if report.run_id %}
+    <a href="{% url 'ats-tool-export-import-report' report.run_id %}"
+       class="inline-block mt-3 px-3 py-1.5 text-xs rounded-md border border-gray-300 hover:bg-gray-50">
+        {% trans "Download Import Report" %}
+    </a>
+    {% endif %}
+    {% endif %}
+</div>
+{% endif %}

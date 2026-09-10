@@ -231,6 +231,35 @@ DUE_DATE_CHOICES = [
 ]
 
 
+class FeedbackFilterForm(forms.Form):
+    """
+    Form backing FeedbackFilter, adding cross-field validation for the
+    advanced date range filters (start/end/created-at ranges) so an
+    inverted range (from-date after to-date) is rejected with an inline
+    error instead of silently matching nothing.
+    """
+
+    def _clean_date_range(self, field_name, label):
+        value = self.cleaned_data.get(field_name)
+        if value and value.start and value.stop and value.start > value.stop:
+            raise forms.ValidationError(
+                _("%(label)s: start date cannot be after end date.")
+                % {"label": label}
+            )
+        return value
+
+    def clean_start_date_range(self):
+        return self._clean_date_range("start_date_range", _("Start Date Range"))
+
+    def clean_end_date_range(self):
+        return self._clean_date_range("end_date_range", _("End Date Range"))
+
+    def clean_created_at_date_range(self):
+        return self._clean_date_range(
+            "created_at_date_range", _("Created At Range")
+        )
+
+
 class FeedbackFilter(HorillaFilterSet):
     """
     Custom filter set for Feedback records.
@@ -250,7 +279,7 @@ class FeedbackFilter(HorillaFilterSet):
 
     search = django_filters.CharFilter(method="search_method")
     review_cycle = django_filters.CharFilter(lookup_expr="icontains")
-    created_at_date_range = DateRangeFilter(
+    created_at_date_range = DateFromToRangeFilter(
         field_name="created_at",
         widget=django_filters.widgets.RangeWidget(
             attrs={"type": "date", "class": "oh-input w-100"}
@@ -275,6 +304,7 @@ class FeedbackFilter(HorillaFilterSet):
         """
 
         model = Feedback
+        form = FeedbackFilterForm
         fields = [
             "manager_id",
             "employee_id",

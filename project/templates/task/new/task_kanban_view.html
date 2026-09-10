@@ -76,6 +76,7 @@
                                     title="{% trans 'Add task' %}"
                                     hx-get="{% url 'quick-create-task' stage.id %}"
                                     hx-target="#taskCreateForm{{stage.id}}"
+                                    onclick="$('#taskCreateForm{{stage.id}}').removeClass('d-none')"
                                 >
                                     <ion-icon
                                         name="add-sharp"

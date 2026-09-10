@@ -9145,6 +9145,8 @@ select.oh-select--lg {
 .select2-dropdown {
   border-radius: 0rem;
   box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px 0px;
+  background-color: #ffffff !important;
+  color: #333333 !important;
 }
 
 .select2-container--open .select2-dropdown--above {
@@ -9164,13 +9166,20 @@ select.oh-select--lg {
   border-bottom-right-radius: 0.25rem !important;
 }
 
-.select2-results__option--selected {
-  background-color: hsl(213, 22%, 93%) !important;
+.select2-results__option {
+  color: #333333 !important;
 }
 
-.select2-results__option--highlighted {
-  background-color: rgba(233, 237, 241, 0.5) !important;
-  color: hsl(0, 0%, 11%) !important;
+.select2-results__option--selected {
+  background-color: hsl(213, 22%, 93%) !important;
+  color: #000000 !important;
+}
+
+.select2-results__option--highlighted,
+.select2-results__option--highlighted[aria-selected],
+.select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+  background-color: rgba(233, 237, 241, 0.9) !important;
+  color: #000000 !important;
 }
 
 .oh-select-no-search + .select2-container,

@@ -1805,12 +1805,34 @@ table .oh-btn-group a {
 
 /* The "Filter" dropdown (nav bars + attendance work record view) is loaded
    via htmx into the page after the initial load, so its Tailwind CDN
-   utility classes (min-w-[400px] p-3) can briefly render unstyled until the
-   Play CDN's JIT compiler rescans the DOM. Pinning padding/min-width here,
-   in the plain stylesheet loaded upfront on every page, keeps this
-   consistent across every filter form regardless of that timing. */
+   utility classes (min-w-[400px], flex/overflow layout) can briefly render
+   unstyled until the Play CDN's JIT compiler rescans the DOM. Pinning
+   min-width/layout here, in the plain stylesheet loaded upfront on every
+   page, keeps this consistent across every filter form regardless of that
+   timing.
+
+   The dropdown is also capped to the viewport height and split into a
+   scrollable body + a fixed footer so that expanding every accordion
+   section (e.g. Feedback + Advanced on the Performance feedback filter)
+   can no longer push the Apply/Filter button out of view with no way to
+   reach it. */
 .oh-filter-dropdown {
   min-width: 400px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 140px);
+}
+
+.oh-filter-dropdown__body {
+  overflow-y: auto;
+  padding: 0.75rem;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.oh-filter-dropdown__footer {
+  flex-shrink: 0;
   padding: 0.75rem;
 }
 
@@ -1877,9 +1899,14 @@ table .oh-btn-group a {
 }
 
 .oh-kanban-card__subtitle {
+  display: block;
   font-size: 0.85rem;
   color: hsl(0, 0%, 45%);
   margin: 0.25rem 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (max-width: 575.98px) {

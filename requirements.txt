@@ -79,3 +79,12 @@ psycopg2-binary
 whitenoise
 django-storages
 boto3
+
+# ATS Resume Shortlisting Tool (native, recruitment > ATS Resume Shortlisting Tool)
+pdfplumber
+pytesseract
+pdf2image
+docx2txt
+phonenumbers
+rapidfuzz
+gdown

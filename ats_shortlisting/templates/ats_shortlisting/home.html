@@ -1,0 +1,117 @@
+{% extends 'index.html' %}
+{% load i18n %}
+{% block content %}
+<div id="messages" class="oh-alert-container"></div>
+
+<div class="p-4 space-y-6">
+    <div>
+        <h1 class="text-xl font-semibold text-gray-800">{% trans "ATS Resume Shortlisting Tool" %}</h1>
+        <p class="text-sm text-gray-500">{% trans "Import resumes (upload or Google Drive), score them against any job description, and track every candidate here." %}</p>
+    </div>
+
+    <form
+        id="ats-run-form"
+        hx-post="{% url 'ats-tool-run-import' %}"
+        hx-target="#ats-results"
+        hx-swap="innerHTML"
+        hx-encoding="multipart/form-data"
+    >
+        {% csrf_token %}
+
+        <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+            <h2 class="font-medium text-gray-800 mb-2">{% trans "1. Job Description" %}</h2>
+            <textarea name="jd_text" rows="8" class="w-full border border-gray-300 rounded-md p-2 text-sm"
+                placeholder="{% trans 'Paste any job description -- software, sales, HR, finance, healthcare, engineering, etc.' %}"
+            >{{ form.jd_text.value|default:'' }}</textarea>
+
+            <button type="button" class="mt-2 px-3 py-1.5 text-sm rounded-md bg-gray-800 text-white hover:bg-gray-700"
+                hx-post="{% url 'ats-tool-analyze-jd' %}"
+                hx-target="#ats-jd-detected-fields"
+                hx-swap="outerHTML"
+            >
+                {% trans "Analyze Job Description" %}
+            </button>
+
+            <div id="ats-jd-detected-fields">
+                {% include "ats_shortlisting/partials/_jd_analysis.html" %}
+            </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+            <h2 class="font-medium text-gray-800 mb-2">{% trans "2. Provide Resumes" %}</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="text-sm text-gray-600">{% trans "Upload files (PDF/DOC/DOCX)" %}</label>
+                    <input type="file" name="resumes" multiple accept=".pdf,.doc,.docx"
+                        class="block w-full text-sm border border-gray-300 rounded-md p-1.5 mt-1">
+                </div>
+                <div>
+                    <label class="text-sm text-gray-600">{% trans "Google Drive folder link" %}</label>
+                    <div class="flex items-center gap-2 mt-1">
+                        <input type="text" name="drive_link" id="ats-drive-link" class="w-full border border-gray-300 rounded-md p-2 text-sm"
+                            placeholder="https://drive.google.com/drive/folders/...">
+                        <button type="button" onclick="document.getElementById('ats-drive-link').value='';"
+                            class="px-2 py-2 text-xs rounded-md border border-gray-300 hover:bg-gray-50 whitespace-nowrap">
+                            {% trans "Clear" %}
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">{% trans "Folder must be shared as 'Anyone with the link can view' unless Drive API credentials are configured." %}</p>
+                    {% if not has_drive_credentials %}
+                    <p class="text-xs text-amber-600 mt-1">&#9888; {% trans "No Google Drive API credentials configured. Falling back to unauthenticated access, which Google may rate-limit." %}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+            <h2 class="font-medium text-gray-800 mb-2">{% trans "3. Run Import" %}</h2>
+
+            <details class="mb-3">
+                <summary class="text-sm text-gray-600 cursor-pointer">{% trans "Scoring weights & thresholds (advanced)" %}</summary>
+                <p class="text-xs text-gray-400 mt-2">{% trans "Don't need to sum to 100 -- automatically normalized." %}</p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3">
+                    <label class="text-xs text-gray-600">{% trans "Required skills %" %}
+                        <input type="number" name="weight_required_skills" value="{{ form.weight_required_skills.value|default:40 }}" min="0" max="100" class="w-full border border-gray-300 rounded-md p-1.5 text-sm">
+                    </label>
+                    <label class="text-xs text-gray-600">{% trans "Preferred skills %" %}
+                        <input type="number" name="weight_preferred_skills" value="{{ form.weight_preferred_skills.value|default:20 }}" min="0" max="100" class="w-full border border-gray-300 rounded-md p-1.5 text-sm">
+                    </label>
+                    <label class="text-xs text-gray-600">{% trans "Experience %" %}
+                        <input type="number" name="weight_experience" value="{{ form.weight_experience.value|default:15 }}" min="0" max="100" class="w-full border border-gray-300 rounded-md p-1.5 text-sm">
+                    </label>
+                    <label class="text-xs text-gray-600">{% trans "Education %" %}
+                        <input type="number" name="weight_education" value="{{ form.weight_education.value|default:10 }}" min="0" max="100" class="w-full border border-gray-300 rounded-md p-1.5 text-sm">
+                    </label>
+                    <label class="text-xs text-gray-600">{% trans "Certifications %" %}
+                        <input type="number" name="weight_certifications" value="{{ form.weight_certifications.value|default:10 }}" min="0" max="100" class="w-full border border-gray-300 rounded-md p-1.5 text-sm">
+                    </label>
+                    <label class="text-xs text-gray-600">{% trans "Resume quality %" %}
+                        <input type="number" name="weight_resume_quality" value="{{ form.weight_resume_quality.value|default:5 }}" min="0" max="100" class="w-full border border-gray-300 rounded-md p-1.5 text-sm">
+                    </label>
+                    <label class="text-xs text-gray-600">{% trans "Shortlist if score >=" %}
+                        <input type="number" name="shortlist_threshold" value="{{ form.shortlist_threshold.value|default:75 }}" min="0" max="100" class="w-full border border-gray-300 rounded-md p-1.5 text-sm">
+                    </label>
+                    <label class="text-xs text-gray-600">{% trans "Maybe if score >=" %}
+                        <input type="number" name="maybe_threshold" value="{{ form.maybe_threshold.value|default:50 }}" min="0" max="100" class="w-full border border-gray-300 rounded-md p-1.5 text-sm">
+                    </label>
+                </div>
+            </details>
+
+            <label class="flex items-center gap-2 text-sm text-gray-600 mb-3">
+                <input type="checkbox" name="replace_existing" value="on" {% if form.replace_existing.value|default_if_none:True %}checked{% endif %}>
+                {% trans "Replace existing candidate database (deletes all current ATS candidates first)" %}
+            </label>
+
+            <button type="submit" class="px-4 py-2 text-sm rounded-md bg-red-600 text-white hover:bg-red-700">
+                {% trans "Run Import & Scoring" %}
+            </button>
+        </div>
+    </form>
+
+    <div id="ats-results">
+        <div id="ats-dashboard-inner">
+            {% include "ats_shortlisting/partials/_dashboard.html" %}
+        </div>
+    </div>
+</div>
+{% endblock %}

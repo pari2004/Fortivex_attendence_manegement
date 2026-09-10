@@ -69,6 +69,11 @@ SUBMENUS = [
         "redirect": reverse("recruitment-settings-view"),
         "accessibility": "recruitment.sidebar.recruitment_settings_accessibility",
     },
+    {
+        "menu": _("ATS Resume Shortlisting Tool"),
+        "redirect": reverse("ats-tool-home"),
+        "accessibility": "recruitment.sidebar.ats_shortlisting_accessibility",
+    },
 ]
 
 
@@ -140,6 +145,14 @@ def recruitment_settings_accessibility(
 
 def dashboard_accessibility(request, submenu, user_perms, *args, **kwargs):
     return is_stagemanager(request.user) or "recruitment" in user_perms
+
+
+def ats_shortlisting_accessibility(
+    request, _submenu: dict = {}, user_perms: PermWrapper = [], *args, **kwargs
+) -> bool:
+    return request.user.is_superuser or request.user.groups.filter(
+        name__in=["Admin", "HR Manager"]
+    ).exists()
 
 
 # ---------------------------------------------------------------------------

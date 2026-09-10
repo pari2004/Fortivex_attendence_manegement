@@ -11,7 +11,13 @@
                     </div>
                     <div class="oh-input-group">
                         <label class="oh-label" for="">{% trans "Key Result" %}</label>
-                        {{ form.employee_objective__key_result_id }}
+                        {% if form.employee_objective__key_result_id.field.queryset.exists %}
+                            {{ form.employee_objective__key_result_id }}
+                        {% else %}
+                            <div class="oh-input w-100 text-muted" style="cursor: default">
+                                {% trans "No key results have been created yet." %}
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="col-sm-12 col-md-12 col-lg-6">

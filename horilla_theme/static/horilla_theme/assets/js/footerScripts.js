@@ -664,7 +664,7 @@ $(document).on("htmx:afterSettle", function (event) {
     }
 });
 
-$(".oh-password-input--toggle").on("click", function (e) {
+$(document).on("click", ".oh-password-input--toggle", function (e) {
     e.preventDefault();
 
     const $toggle = $(this);

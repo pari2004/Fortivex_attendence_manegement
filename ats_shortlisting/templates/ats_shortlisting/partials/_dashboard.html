@@ -1,0 +1,150 @@
+{% load i18n %}
+<div class="bg-white border border-gray-200 rounded-lg p-4">
+    <h2 class="font-medium text-gray-800 mb-3">{% trans "4. Candidate Dashboard" %}</h2>
+
+    {% if not has_candidates %}
+        <p class="text-sm text-gray-500">{% trans "No candidates imported yet. Run an import above to populate the dashboard." %}</p>
+    {% else %}
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div class="border border-gray-200 rounded-md p-3">
+            <p class="text-xs text-gray-500">{% trans "Total Applicants" %}</p>
+            <p class="text-lg font-semibold">{{ total_candidates }}</p>
+        </div>
+        <div class="border border-gray-200 rounded-md p-3">
+            <p class="text-xs text-gray-500">{% trans "Shortlisted" %}</p>
+            <p class="text-lg font-semibold text-green-600">{{ shortlisted_count }}</p>
+        </div>
+        <div class="border border-gray-200 rounded-md p-3">
+            <p class="text-xs text-gray-500">{% trans "Rejected" %}</p>
+            <p class="text-lg font-semibold text-red-600">{{ rejected_count }}</p>
+        </div>
+        <div class="border border-gray-200 rounded-md p-3">
+            <p class="text-xs text-gray-500">{% trans "Average ATS Score" %}</p>
+            <p class="text-lg font-semibold">{{ avg_score }}</p>
+        </div>
+    </div>
+
+    {% if domains %}
+    <p class="text-xs text-gray-500 mb-4">{% trans "Domains represented in this candidate pool:" %} {{ domains|join:", " }}</p>
+    {% endif %}
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div class="border border-gray-200 rounded-md p-3">
+            <p class="text-xs text-gray-500 mb-2">{% trans "Skill Distribution" %}</p>
+            <canvas id="atsSkillChart" height="160"></canvas>
+        </div>
+        <div class="border border-gray-200 rounded-md p-3">
+            <p class="text-xs text-gray-500 mb-2">{% trans "Top Missing Skills" %}</p>
+            <canvas id="atsMissingChart" height="160"></canvas>
+        </div>
+        <div class="border border-gray-200 rounded-md p-3">
+            <p class="text-xs text-gray-500 mb-2">{% trans "Experience Distribution" %}</p>
+            <canvas id="atsExpChart" height="160"></canvas>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        if (typeof Chart === "undefined") { return; }
+        var specs = [
+            {id: "atsSkillChart", labels: {{ skill_labels|safe }}, data: {{ skill_counts|safe }}, color: "#2563eb"},
+            {id: "atsMissingChart", labels: {{ missing_labels|safe }}, data: {{ missing_counts|safe }}, color: "#dc2626"},
+            {id: "atsExpChart", labels: {{ exp_labels|safe }}, data: {{ exp_counts|safe }}, color: "#059669"}
+        ];
+        specs.forEach(function(spec) {
+            var canvas = document.getElementById(spec.id);
+            if (!canvas) { return; }
+            var existing = Chart.getChart ? Chart.getChart(canvas) : null;
+            if (existing) { existing.destroy(); }
+            new Chart(canvas, {
+                type: "bar",
+                data: {
+                    labels: spec.labels,
+                    datasets: [{ data: spec.data, backgroundColor: spec.color }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                }
+            });
+        });
+    })();
+    </script>
+
+    <form
+        hx-get="{% url 'ats-tool-dashboard' %}"
+        hx-target="#ats-dashboard-inner"
+        hx-swap="innerHTML"
+        hx-trigger="change, submit"
+        class="flex flex-wrap items-end gap-3 mb-3 text-sm"
+    >
+        <label class="text-xs text-gray-600">{% trans "Recommendation" %}
+            <select name="recommendation" multiple class="border border-gray-300 rounded-md p-1.5 text-sm block">
+                <option value="Shortlist">{% trans "Shortlist" %}</option>
+                <option value="Maybe">{% trans "Maybe" %}</option>
+                <option value="Reject">{% trans "Reject" %}</option>
+            </select>
+        </label>
+        <label class="text-xs text-gray-600">{% trans "Min ATS Score" %}
+            <input type="number" name="min_score" min="0" max="100" value="{{ filter_form.min_score.value|default:'' }}" class="border border-gray-300 rounded-md p-1.5 text-sm block w-24">
+        </label>
+        <label class="text-xs text-gray-600">{% trans "Domain" %}
+            <select name="domain" class="border border-gray-300 rounded-md p-1.5 text-sm block">
+                <option value="">{% trans "All" %}</option>
+                {% for d in domains %}<option value="{{ d }}" {% if filter_form.domain.value == d %}selected{% endif %}>{{ d }}</option>{% endfor %}
+            </select>
+        </label>
+        <label class="text-xs text-gray-600">{% trans "Search name/email" %}
+            <input type="text" name="search" value="{{ filter_form.search.value|default:'' }}" class="border border-gray-300 rounded-md p-1.5 text-sm block">
+        </label>
+        <button type="submit" class="px-3 py-1.5 text-sm rounded-md bg-gray-800 text-white hover:bg-gray-700">{% trans "Filter" %}</button>
+        <a href="{% url 'ats-tool-export' %}?{{ request.GET.urlencode }}" class="px-3 py-1.5 text-sm rounded-md border border-gray-300 hover:bg-gray-50">{% trans "Download Applicants.xlsx" %}</a>
+    </form>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-xs">
+            <thead>
+                <tr class="text-left text-gray-500 border-b border-gray-200">
+                    <th class="py-1 pr-3">{% trans "Name" %}</th>
+                    <th class="py-1 pr-3">{% trans "Email" %}</th>
+                    <th class="py-1 pr-3">{% trans "Phone" %}</th>
+                    <th class="py-1 pr-3">{% trans "Experience" %}</th>
+                    <th class="py-1 pr-3">{% trans "Skills" %}</th>
+                    <th class="py-1 pr-3">{% trans "Domain" %}</th>
+                    <th class="py-1 pr-3">{% trans "ATS Score" %}</th>
+                    <th class="py-1 pr-3">{% trans "Recommendation" %}</th>
+                    <th class="py-1 pr-3">{% trans "Status" %}</th>
+                    <th class="py-1 pr-3">{% trans "Resume" %}</th>
+                    <th class="py-1 pr-3">{% trans "Imported Date" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for candidate in candidates %}
+                <tr class="border-b border-gray-100">
+                    <td class="py-1 pr-3">{{ candidate.name }}</td>
+                    <td class="py-1 pr-3">{{ candidate.email }}</td>
+                    <td class="py-1 pr-3">{{ candidate.phone }}</td>
+                    <td class="py-1 pr-3">{{ candidate.experience_text }}</td>
+                    <td class="py-1 pr-3 max-w-xs truncate" title="{{ candidate.skills }}">{{ candidate.skills }}</td>
+                    <td class="py-1 pr-3">{{ candidate.detected_job_domain }}</td>
+                    <td class="py-1 pr-3">{{ candidate.ats_score }}</td>
+                    <td class="py-1 pr-3">
+                        <span class="{% if candidate.recommendation == 'Shortlist' %}text-green-600{% elif candidate.recommendation == 'Reject' %}text-red-600{% else %}text-amber-600{% endif %}">
+                            {{ candidate.recommendation }}
+                        </span>
+                        {% if candidate.recommendation_text %}
+                        <span class="block text-[10px] text-gray-400">{{ candidate.recommendation_text }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-1 pr-3">{{ candidate.status }}</td>
+                    <td class="py-1 pr-3">
+                        {% if candidate.resume %}<a href="{{ candidate.resume.url }}" class="text-blue-600 hover:underline" target="_blank">{% trans "Download" %}</a>{% endif %}
+                    </td>
+                    <td class="py-1 pr-3">{{ candidate.imported_time|date:"Y-m-d H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>

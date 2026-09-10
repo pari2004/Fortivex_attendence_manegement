@@ -113,8 +113,11 @@ $(document).ready(function () {
 
     function employeeChart(dataSet, labels) {
         $(document).ready(function () {
-            const ctx = document.getElementById("totalEmployees")?.getContext("2d");
-            if (!ctx) return;
+            const canvas = document.getElementById("totalEmployees");
+            if (!canvas) return;
+            const existingChart = Chart.getChart ? Chart.getChart(canvas) : null;
+            if (existingChart) existingChart.destroy();
+            const ctx = canvas.getContext("2d");
 
             const { tickColor } = ChartTheme.getColors();
 
@@ -244,12 +247,11 @@ $(document).ready(function () {
     }
 
     function genderChart(dataSet, labels) {
-        const centerImage = new Image();
-        centerImage.src = "/static/horilla_theme/assets/img/icons/gender.svg";
-
-        if (document.getElementById("genderChart")) {
-            const ctx = document.getElementById("genderChart").getContext("2d");
-            const { tickColor } = ChartTheme.getColors();
+        const canvas = document.getElementById("genderChart");
+        if (canvas) {
+            const existingChart = Chart.getChart ? Chart.getChart(canvas) : null;
+            if (existingChart) existingChart.destroy();
+            const ctx = canvas.getContext("2d");
 
             // Override dataset background colors with new design colors
             const updatedDataSet = dataSet.map((ds) => ({
@@ -336,8 +338,11 @@ $(document).ready(function () {
 
     function departmentChart(dataSet, labels) {
         $(document).ready(function () {
-            const ctx = $("#departmentChart")[0]?.getContext("2d");
-            if (!ctx) return;
+            const canvas = document.getElementById("departmentChart");
+            if (!canvas) return;
+            const existingChart = Chart.getChart ? Chart.getChart(canvas) : null;
+            if (existingChart) existingChart.destroy();
+            const ctx = canvas.getContext("2d");
             const { tickColor } = ChartTheme.getColors();
 
             const values = dataSet[0].data;

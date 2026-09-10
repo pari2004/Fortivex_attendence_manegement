@@ -96,28 +96,40 @@
                     <!-- Start Date Range -->
                     <div class="col-md-6 col-lg-12">
                         <label class="oh-label">{% trans "Start Date Range" %}</label>
-                        <div class="d-flex gap-2">
+                        <div class="d-flex gap-2 date-range-group" data-range-group="start_date_range">
                             {{ feedback_filter_form.start_date_range.0 }}
                             {{ feedback_filter_form.start_date_range.1 }}
                         </div>
+                        <div class="date-range-error text-danger" style="display:none;font-size:12px;"></div>
+                        {% for error in feedback_filter_form.start_date_range.errors %}
+                            <div class="text-danger" style="font-size:12px;">{{ error }}</div>
+                        {% endfor %}
                     </div>
 
                     <!-- End Date Range -->
                     <div class="col-md-6 col-lg-12">
                         <label class="oh-label">{% trans "End Date Range" %}</label>
-                        <div class="d-flex gap-2">
+                        <div class="d-flex gap-2 date-range-group" data-range-group="end_date_range">
                             {{ feedback_filter_form.end_date_range.0 }}
                             {{ feedback_filter_form.end_date_range.1 }}
                         </div>
+                        <div class="date-range-error text-danger" style="display:none;font-size:12px;"></div>
+                        {% for error in feedback_filter_form.end_date_range.errors %}
+                            <div class="text-danger" style="font-size:12px;">{{ error }}</div>
+                        {% endfor %}
                     </div>
 
                     <!-- Created At Range (if needed) -->
                     <div class="col-md-6 col-lg-12">
                         <label class="oh-label">{% trans "Created At Range" %}</label>
-                        <div class="d-flex gap-2">
+                        <div class="d-flex gap-2 date-range-group" data-range-group="created_at_date_range">
                             {{ feedback_filter_form.created_at_date_range.0 }}
                             {{ feedback_filter_form.created_at_date_range.1 }}
                         </div>
+                        <div class="date-range-error text-danger" style="display:none;font-size:12px;"></div>
+                        {% for error in feedback_filter_form.created_at_date_range.errors %}
+                            <div class="text-danger" style="font-size:12px;">{{ error }}</div>
+                        {% endfor %}
                     </div>
                 </div>
                 <div class="col-md-6 col-lg-12">
@@ -165,3 +177,55 @@
         </div>
     </div>
 </div>
+
+<script>
+    (function () {
+        function validateGroup(group) {
+            var inputs = group.querySelectorAll('input[type="date"]');
+            var errorEl = group.parentElement.querySelector('.date-range-error');
+            if (inputs.length < 2 || !errorEl) {
+                return true;
+            }
+            var from = inputs[0].value;
+            var to = inputs[1].value;
+            var invalid = from && to && from > to;
+            if (invalid) {
+                errorEl.textContent = "{% trans 'Start date cannot be after end date.' %}";
+                errorEl.style.display = 'block';
+                inputs[0].classList.add('is-invalid');
+                inputs[1].classList.add('is-invalid');
+            } else {
+                errorEl.style.display = 'none';
+                inputs[0].classList.remove('is-invalid');
+                inputs[1].classList.remove('is-invalid');
+            }
+            return !invalid;
+        }
+
+        var dateRangeGroups = document.querySelectorAll('.date-range-group');
+        dateRangeGroups.forEach(function (group) {
+            group.querySelectorAll('input[type="date"]').forEach(function (input) {
+                input.addEventListener('change', function () { validateGroup(group); });
+                input.addEventListener('blur', function () { validateGroup(group); });
+            });
+        });
+
+        var filterForm = document.getElementById('filterForm');
+        if (filterForm && !filterForm.dataset.dateRangeValidationBound) {
+            filterForm.dataset.dateRangeValidationBound = 'true';
+            filterForm.addEventListener('submit', function (evt) {
+                var allValid = true;
+                document.querySelectorAll('.date-range-group').forEach(function (group) {
+                    if (!validateGroup(group)) {
+                        allValid = false;
+                    }
+                });
+                if (!allValid) {
+                    evt.preventDefault();
+                    evt.stopImmediatePropagation();
+                }
+            }, true);
+        }
+    })();
+</script>
+
