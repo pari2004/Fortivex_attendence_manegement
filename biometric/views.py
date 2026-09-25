@@ -8,6 +8,8 @@ registered on biometric devices.
 
 import json
 import logging
+import os
+import sys
 from datetime import datetime, timedelta
 from threading import Event, Thread
 from urllib.parse import parse_qs, unquote
@@ -2631,55 +2633,64 @@ def etimeoffice_biometric_attendance_scheduler(device_id):
         etimeoffice_biometric_attendance_logs(device)
 
 
-try:
-    devices = BiometricDevices.objects.all().update(is_live=False)
-    for device in BiometricDevices.objects.filter(is_scheduler=True):
-        if device:
-            if str_time_seconds(device.scheduler_duration) > 0:
-                if device.machine_type == "anviz":
-                    scheduler = BackgroundScheduler()
-                    scheduler.add_job(
-                        lambda: anviz_biometric_attendance_scheduler(device.id),
-                        "interval",
-                        seconds=str_time_seconds(device.scheduler_duration),
-                    )
-                    scheduler.start()
-                elif device.machine_type == "zk":
-                    scheduler = BackgroundScheduler()
-                    scheduler.add_job(
-                        lambda: zk_biometric_attendance_scheduler(device.id),
-                        "interval",
-                        seconds=str_time_seconds(device.scheduler_duration),
-                        id=f"biometric_{device.id}",
-                    )
-                    scheduler.start()
-                elif device.machine_type == "dahua":
-                    scheduler = BackgroundScheduler()
-                    scheduler.add_job(
-                        lambda: dahua_biometric_attendance_scheduler(device.id),
-                        "interval",
-                        seconds=str_time_seconds(device.scheduler_duration),
-                    )
-                    scheduler.start()
+if "VERCEL" not in os.environ and not any(
+    cmd in sys.argv
+    for cmd in ["makemigrations", "migrate", "compilemessages", "flush", "shell"]
+):
+    # Serverless platforms (Vercel) tear the process down between requests, so
+    # an in-process interval scheduler never gets a chance to fire - skip this
+    # reset-and-schedule step there instead of paying for it (and leaking a
+    # scheduler) on every cold start. Matches the guard already used in
+    # base/scheduler.py, asset/scheduler.py, leave/scheduler.py, etc.
+    try:
+        devices = BiometricDevices.objects.all().update(is_live=False)
+        for device in BiometricDevices.objects.filter(is_scheduler=True):
+            if device:
+                if str_time_seconds(device.scheduler_duration) > 0:
+                    if device.machine_type == "anviz":
+                        scheduler = BackgroundScheduler()
+                        scheduler.add_job(
+                            lambda: anviz_biometric_attendance_scheduler(device.id),
+                            "interval",
+                            seconds=str_time_seconds(device.scheduler_duration),
+                        )
+                        scheduler.start()
+                    elif device.machine_type == "zk":
+                        scheduler = BackgroundScheduler()
+                        scheduler.add_job(
+                            lambda: zk_biometric_attendance_scheduler(device.id),
+                            "interval",
+                            seconds=str_time_seconds(device.scheduler_duration),
+                            id=f"biometric_{device.id}",
+                        )
+                        scheduler.start()
+                    elif device.machine_type == "dahua":
+                        scheduler = BackgroundScheduler()
+                        scheduler.add_job(
+                            lambda: dahua_biometric_attendance_scheduler(device.id),
+                            "interval",
+                            seconds=str_time_seconds(device.scheduler_duration),
+                        )
+                        scheduler.start()
 
-                elif device.machine_type == "cosec":
-                    scheduler = BackgroundScheduler()
-                    scheduler.add_job(
-                        lambda: cosec_biometric_attendance_scheduler(device.id),
-                        "interval",
-                        seconds=str_time_seconds(device.scheduler_duration),
-                    )
-                    scheduler.start()
+                    elif device.machine_type == "cosec":
+                        scheduler = BackgroundScheduler()
+                        scheduler.add_job(
+                            lambda: cosec_biometric_attendance_scheduler(device.id),
+                            "interval",
+                            seconds=str_time_seconds(device.scheduler_duration),
+                        )
+                        scheduler.start()
 
-                elif device.machine_type == "etimeoffice":
-                    scheduler = BackgroundScheduler()
-                    scheduler.add_job(
-                        lambda: etimeoffice_biometric_attendance_scheduler(device.id),
-                        "interval",
-                        seconds=str_time_seconds(device.scheduler_duration),
-                    )
-                    scheduler.start()
-                else:
-                    pass
-except:
-    pass
+                    elif device.machine_type == "etimeoffice":
+                        scheduler = BackgroundScheduler()
+                        scheduler.add_job(
+                            lambda: etimeoffice_biometric_attendance_scheduler(device.id),
+                            "interval",
+                            seconds=str_time_seconds(device.scheduler_duration),
+                        )
+                        scheduler.start()
+                    else:
+                        pass
+    except Exception:
+        pass

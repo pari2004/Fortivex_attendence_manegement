@@ -1,3 +1,5 @@
+import os
+
 from django.apps import AppConfig
 from django.conf import settings
 
@@ -19,7 +21,14 @@ class HorillaLdapConfig(AppConfig):
         )
         super().ready()
 
-        ldap_config = config.load_ldap_settings()
+        if "VERCEL" in os.environ:
+            # Serverless cold-starts pay for this DB query on every boot
+            # regardless of whether LDAP is configured. Skip it there and
+            # fall back to defaults; non-serverless deployments still load
+            # the real settings below.
+            ldap_config = settings.DEFAULT_LDAP_CONFIG
+        else:
+            ldap_config = config.load_ldap_settings()
 
         # Apply settings dynamically
         settings.LDAP_SERVER = ldap_config["LDAP_SERVER"]
