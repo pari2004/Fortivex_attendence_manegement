@@ -56,6 +56,13 @@ def get_companies(request):
     plus their work-info company. "All my companies" appears when they hold
     roles in 2+ companies (combined view over those assignment IDs only).
     """
+    if not request.user.is_authenticated:
+        return {
+            "all_companies": [],
+            "company_selected": False,
+            "show_company_switcher": False,
+        }
+
     from base.auth_backends import (
         company_scoped_active,
         get_allowed_company_ids,
@@ -239,6 +246,9 @@ def resignation_request_enabled(request):
     """
     Check weather resignation_request enabled of not in offboarding
     """
+    if not request.user.is_authenticated:
+        return {"enabled_resignation_request": False}
+
     selected_company = request.session.get("selected_company")
     enabled_resignation_request = False
     first = None
@@ -261,6 +271,9 @@ def timerunner_enabled(request):
     """
     Check weather resignation_request enabled of not in offboarding
     """
+    if not request.user.is_authenticated:
+        return {"enabled_timerunner": True}
+
     first = None
     enabled_timerunner = True
     if apps.is_installed("attendance"):
@@ -277,6 +290,9 @@ def intial_notice_period(request):
     """
     Check weather resignation_request enabled of not in offboarding
     """
+    if not request.user.is_authenticated:
+        return {"get_initial_notice_period": 30}
+
     initial = 30
     first = None
     if apps.is_installed("payroll"):
@@ -365,6 +381,8 @@ def enable_late_come_early_out_tracking(request):
         tracking = TrackLateComeEarlyOut.objects.first()
         enable = tracking.is_enable if tracking else True
         return {"tracking": enable, "late_come_early_out_tracking": enable}
+    if not request.user.is_authenticated:
+        return {"tracking": True, "late_come_early_out_tracking": True}
     selected_company = request.session.get("selected_company")
     if selected_company == "all":
         company = None
@@ -377,6 +395,9 @@ def enable_late_come_early_out_tracking(request):
 
 
 def enable_profile_edit(request):
+    if not request.user.is_authenticated:
+        return {"profile_edit_enabled": False}
+
     from accessibility.accessibility import ACCESSBILITY_FEATURE
 
     profile_edit = ProfileEditFeature.objects.filter().first()
@@ -395,6 +416,8 @@ def export_access_enabled(request):
     export buttons/menu options without requiring per-view context.
     Superusers always see export actions regardless of the setting.
     """
+    if not request.user.is_authenticated:
+        return {"export_access_enabled": False}
     if request.user.is_superuser:
         return {"export_access_enabled": True}
 
@@ -416,6 +439,9 @@ def navbar_languages(request):
     once a company has explicitly enabled one or more languages; until
     then it stays hidden rather than defaulting to every language.
     """
+    if not request.user.is_authenticated:
+        return {"navbar_languages": [], "show_language_switcher": False}
+
     selected_company = request.session.get("selected_company")
     if not selected_company or selected_company == "all":
         company = None
