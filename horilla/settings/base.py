@@ -323,7 +323,7 @@ MESSAGE_TAGS = {
     messages.ERROR: "oh-alert--danger",
 }
 
-LOGIN_URL = "/login"
+LOGIN_URL = "/login/"
 SIMPLE_HISTORY_REVERT_DISABLED = True
 
 DJANGO_NOTIFICATIONS_CONFIG = {
