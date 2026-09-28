@@ -346,17 +346,14 @@ class CompanyMiddleware:
             return self.get_response(request)
 
         selected_company = request.session.get("selected_company")
-        selected_company_obj = None
 
         # --- Determine company ---
         if selected_company == "all":
             company_id = "all"
 
         elif selected_company:
-            # Fetch the row (not just .exists()) so it can be reused below
-            # instead of querying the same company a second time.
-            selected_company_obj = Company.objects.filter(id=selected_company).first()
-            company_id = selected_company if selected_company_obj else None
+            company_exists = Company.objects.filter(id=selected_company).exists()
+            company_id = selected_company if company_exists else None
 
         else:
             # First login or session expired → set user's own company
@@ -402,10 +399,7 @@ class CompanyMiddleware:
 
         # ✅ Store in context
         set_selected_company(company_id)
-        if selected_company_obj is not None and company_id == selected_company:
-            company_obj = selected_company_obj
-        else:
-            company_obj = self._get_company_obj(request, company_id)
+        company_obj = self._get_company_obj(request, company_id)
         self._set_company_session(request, company_obj)
 
         return self.get_response(request)

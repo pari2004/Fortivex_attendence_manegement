@@ -340,10 +340,9 @@ def breadcrumbs(request):
                     pass
                 else:
                     # Store the candidates in the session
-                    # Only the ids are stored, so don't load full rows.
-                    request.session["filtered_candidates"] = list(
-                        candidates.values_list("id", flat=True)
-                    )
+                    request.session["filtered_candidates"] = [
+                        candidate.id for candidate in candidates
+                    ]
 
             if "employee-filter-view" in parts:
                 pass
@@ -355,10 +354,9 @@ def breadcrumbs(request):
                 pass
             else:
                 # Store the employees in the session
-                # Only the ids are stored, so don't load full rows.
-                request.session["filtered_employees"] = list(
-                    employees.values_list("id", flat=True)
-                )
+                request.session["filtered_employees"] = [
+                    employee.id for employee in employees
+                ]
 
         if len(parts) == 0:
             request.session["breadcrumbs"].clear()
