@@ -110,7 +110,7 @@
                         class="absolute w-7 h-7 rounded-full text-xs text-[white] font-semibold flex items-center justify-center border-2 border-white p-1 [right:-10px] [top:-7px]{% if not unread_count %} hidden{% endif %}"
                         style="background-color: {{ theme_obj.primary_600|default:'#d7391d' }}"
                     >
-                        {% live_notify_badge %}
+                        {% if unread_count != "" %}<span class='live_notify_badge'>{{ unread_count }}</span>{% endif %}{# same markup as live_notify_badge, reusing unread_count instead of a second COUNT query #}
                     </span>
                 </button>
                 <script>
