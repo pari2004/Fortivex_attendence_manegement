@@ -9,7 +9,6 @@ import os
 from datetime import date, datetime
 from urllib.parse import parse_qs
 
-import pandas as pd
 from django.conf import settings
 from django.contrib import messages
 from django.core.files.base import ContentFile
@@ -72,8 +71,11 @@ from horilla.decorators import (
 )
 from horilla.group_by import group_by_queryset
 from horilla.http.response import HorillaRedirect
+from horilla.lazy_imports import LazyModule
 from horilla.methods import horilla_users_with_perms
 from notifications.signals import notify
+
+pd = LazyModule("pandas")
 
 
 def asset_del(request, asset):

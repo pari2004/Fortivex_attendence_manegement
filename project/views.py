@@ -5,7 +5,6 @@ import logging
 from collections import defaultdict
 from urllib.parse import parse_qs, urlparse
 
-import pandas as pd
 from django.contrib import messages
 from django.core import serializers
 from django.http import Http404, HttpResponse, JsonResponse
@@ -18,6 +17,7 @@ from django.views.decorators.http import require_http_methods
 from base.methods import filtersubordinates, get_key_instances
 from horilla.decorators import hx_request_required, login_required, permission_required
 from horilla.http import HorillaRedirect
+from horilla.lazy_imports import LazyModule
 from horilla.methods import handle_no_permission
 from notifications.signals import notify
 from project.methods import (
@@ -36,6 +36,8 @@ from .methods import (
     is_projectmanager_or_member_or_perms,
 )
 from .models import *
+
+pd = LazyModule("pandas")
 
 logger = logging.getLogger(__name__)
 

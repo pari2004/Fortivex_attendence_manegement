@@ -4,7 +4,6 @@ from django.http import QueryDict
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
-from geopy.distance import geodesic
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
@@ -123,6 +122,10 @@ class GeoFencingEmployeeLocationCheckAPIView(APIView):
                     request.data.get("latitude"),
                     request.data.get("longitude"),
                 )
+                # Imported lazily: geopy loads every geocoder backend (~50ms)
+                # and these views are imported on every startup.
+                from geopy.distance import geodesic
+
                 distance = geodesic(geofence_center, employee_location).meters
                 if distance <= company_location.radius_in_meters:
                     return Response(

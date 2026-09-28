@@ -2,11 +2,13 @@
 
 import uuid
 
-import pandas as pd
 from django.conf import settings
 from django.http import HttpResponse
 
+from horilla.lazy_imports import LazyModule
 from horilla.methods import remove_dynamic_url
+
+pd = LazyModule("pandas")
 
 
 def handle_attendance_errors(error_list):

@@ -9,7 +9,6 @@ import traceback
 from typing import Any
 from urllib.parse import parse_qs, parse_qsl, urlencode, urlparse, urlunparse
 
-import pandas as pd
 from bs4 import BeautifulSoup
 from django import forms
 from django.contrib import messages
@@ -26,7 +25,6 @@ from django.urls import resolve, reverse
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, FormView, ListView, TemplateView
-from xhtml2pdf import pisa
 
 from base.methods import (
     closest_numbers,
@@ -41,6 +39,7 @@ from horilla.filters import FilterSet
 from horilla.group_by import group_by_queryset
 from horilla.horilla_middlewares import _thread_locals, get_selected_company
 from horilla.http.response import HorillaRedirect
+from horilla.lazy_imports import LazyModule
 from horilla.models import HorillaModel
 from horilla.signals import post_generic_import, pre_generic_import
 from horilla_views import models
@@ -61,6 +60,9 @@ from horilla_views.cbv_methods import (  # update_initial_cache,
 from horilla_views.forms import DynamicBulkUpdateForm, ToggleColumnForm
 from horilla_views.related_link_registry import RELATED_VIEW_PARAM, register_detail_view
 from horilla_views.templatetags.generic_template_filters import getattribute
+
+pd = LazyModule("pandas")
+pisa = LazyModule("xhtml2pdf.pisa")
 
 logger = logging.getLogger(__name__)
 

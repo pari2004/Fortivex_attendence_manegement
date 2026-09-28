@@ -22,7 +22,6 @@ from datetime import date, datetime, timedelta
 from urllib.parse import parse_qs, urlparse
 
 import numpy as np
-import pandas as pd
 from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
@@ -121,6 +120,7 @@ from horilla.decorators import (
 from horilla.filters import HorillaPaginator
 from horilla.group_by import group_by_queryset
 from horilla.http.response import HorillaRedirect
+from horilla.lazy_imports import LazyModule
 from horilla.methods import dynamic_attr, get_horilla_model_class
 from horilla_audit.models import AccountBlockUnblock, HistoryTrackingFields
 from horilla_auth.models import HorillaUser
@@ -132,6 +132,8 @@ from horilla_documents.forms import (
 )
 from horilla_documents.models import Document, DocumentRequest
 from notifications.signals import notify
+
+pd = LazyModule("pandas")
 
 
 def return_none(a, b):

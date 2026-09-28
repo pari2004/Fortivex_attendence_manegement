@@ -10,7 +10,6 @@ from datetime import date, datetime, timedelta
 from itertools import groupby
 from urllib.parse import parse_qs
 
-import pandas as pd
 import pdfkit
 from django.conf import settings as pay_settings
 from django.contrib import messages
@@ -42,6 +41,7 @@ from horilla.decorators import (
 )
 from horilla.group_by import group_by_queryset
 from horilla.http.response import HorillaRedirect
+from horilla.lazy_imports import LazyModule
 from notifications.signals import notify
 from payroll.context_processors import get_active_employees
 from payroll.filters import ContractFilter, ContractReGroup, PayslipFilter
@@ -62,6 +62,8 @@ from payroll.models.models import (
     ReimbursementrequestComment,
 )
 from payroll.models.tax_models import PayrollSettings
+
+pd = LazyModule("pandas")
 
 # Create your views here.
 

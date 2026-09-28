@@ -1,5 +1,4 @@
 from django.utils.translation import gettext_lazy as _
-from geopy.geocoders import Nominatim
 from rest_framework import serializers
 
 from .models import GeoFencing
@@ -11,6 +10,8 @@ class GeoFencingSetupSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def validate(self, data):
+        from geopy.geocoders import Nominatim
+
         geolocator = Nominatim(user_agent="geo_checker")  # Use a unique user-agent
         try:
             latitude = data.get("latitude")

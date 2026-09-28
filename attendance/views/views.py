@@ -28,7 +28,6 @@ from collections import defaultdict
 from datetime import date, datetime, timedelta
 from urllib.parse import parse_qs, urlparse
 
-import pandas as pd
 from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -127,7 +126,10 @@ from horilla.decorators import (
     manager_can_enter,
     permission_required,
 )
+from horilla.lazy_imports import LazyModule
 from notifications.signals import notify
+
+pd = LazyModule("pandas")
 
 
 def attendance_validate(attendance):
