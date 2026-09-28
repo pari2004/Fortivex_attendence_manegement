@@ -7,6 +7,7 @@ This module is used write custom methods
 import calendar
 from datetime import date, datetime, time, timedelta
 
+import pandas as pd
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
@@ -18,9 +19,6 @@ from django.utils.translation import gettext_lazy as _
 from base.methods import get_pagination
 from base.models import WEEK_DAYS, CompanyLeaves, Holidays
 from employee.models import Employee
-from horilla.lazy_imports import LazyModule
-
-pd = LazyModule("pandas")
 
 MONTH_MAPPING = {
     "january": 1,

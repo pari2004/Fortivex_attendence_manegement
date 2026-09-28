@@ -1,14 +1,12 @@
 import calendar
 from datetime import date, datetime, timedelta
 
+import pandas as pd
 from django.apps import apps
 from django.db.models import Q
 
 from employee.models import Employee
-from horilla.lazy_imports import LazyModule
 from horilla.methods import get_horilla_model_class
-
-pd = LazyModule("pandas")
 
 
 def calculate_requested_days(

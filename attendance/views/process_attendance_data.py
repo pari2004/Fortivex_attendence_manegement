@@ -7,12 +7,11 @@ from Excel files and saving it to a database.
 
 from datetime import datetime
 
+import pandas as pd
+
 from attendance.models import Attendance
 from base.models import EmployeeShift, WorkType
 from employee.models import Employee
-from horilla.lazy_imports import LazyModule
-
-pd = LazyModule("pandas")
 
 
 def format_time(time_obj):

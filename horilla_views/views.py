@@ -29,11 +29,11 @@ from django.views.decorators.csrf import csrf_protect
 from openpyxl import Workbook
 from openpyxl.drawing.image import Image
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+from xhtml2pdf import pisa
 
 from base.methods import eval_validate, has_export_access
 from horilla.decorators import login_required as func_login_required
 from horilla.http.response import HorillaRedirect
-from horilla.lazy_imports import LazyModule
 from horilla.signals import post_generic_delete, pre_generic_delete
 from horilla_views import models
 from horilla_views.cbv_methods import (
@@ -47,8 +47,6 @@ from horilla_views.cbv_methods import (
 from horilla_views.forms import SavedFilterForm
 from horilla_views.generic.cbv.views import HorillaFormView, HorillaListView
 from horilla_views.templatetags.generic_template_filters import getattribute
-
-pisa = LazyModule("xhtml2pdf.pisa")
 
 # Create your views here.
 

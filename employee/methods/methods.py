@@ -8,6 +8,7 @@ import threading
 from datetime import date, datetime
 from itertools import chain, groupby
 
+import pandas as pd
 from django.apps import apps
 from django.db import connection, models, transaction
 from django.utils.translation import gettext as _
@@ -23,10 +24,7 @@ from base.models import (
     WorkType,
 )
 from employee.models import Employee, EmployeeWorkInformation
-from horilla.lazy_imports import LazyModule
 from horilla_auth.models import HorillaUser
-
-pd = LazyModule("pandas")
 
 logger = logging.getLogger(__name__)
 

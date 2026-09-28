@@ -22,6 +22,7 @@ from datetime import date, datetime
 from itertools import chain
 from urllib.parse import parse_qs
 
+import fitz  # type: ignore
 from django import template
 from django.conf import settings
 from django.contrib import messages
@@ -62,7 +63,6 @@ from horilla.decorators import (
 )
 from horilla.group_by import group_by_queryset
 from horilla.http import HorillaRedirect
-from horilla.lazy_imports import LazyModule
 from horilla_auth.models import HorillaUser
 from horilla_documents.models import Document
 from notifications.signals import notify
@@ -125,8 +125,6 @@ from recruitment.models import (
 )
 from recruitment.views.linkedin import delete_post, post_recruitment_in_linkedin
 from recruitment.views.paginator_qry import paginator_qry
-
-fitz = LazyModule("fitz")
 
 
 def is_stagemanager(request, stage_id=False):

@@ -14,6 +14,7 @@ from datetime import date, datetime, timedelta
 from itertools import groupby
 from urllib.parse import parse_qs
 
+import pandas as pd
 from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
@@ -49,7 +50,6 @@ from horilla.decorators import (
 )
 from horilla.group_by import group_by_queryset
 from horilla.http.response import HorillaRedirect
-from horilla.lazy_imports import LazyModule
 from horilla.methods import dynamic_attr, get_horilla_model_class, get_urlencode
 
 # from leave.models import AvailableLeave
@@ -91,8 +91,6 @@ from payroll.models.models import (
     ReimbursementMultipleAttachment,
 )
 from payroll.threadings.mail import MailSendThread
-
-pd = LazyModule("pandas")
 
 # from asset.models import Asset
 

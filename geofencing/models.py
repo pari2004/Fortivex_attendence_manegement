@@ -2,6 +2,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
+from geopy.geocoders import Nominatim
 
 
 class GeoFencing(models.Model):
@@ -26,10 +27,6 @@ class GeoFencing(models.Model):
                 raise ValidationError(
                     _("Only one GeoFencing can have a null company_id.")
                 )
-
-        # Imported here rather than at module level: geopy pulls in every
-        # geocoder backend (~50ms) and this model is loaded on every startup.
-        from geopy.geocoders import Nominatim
 
         geolocator = Nominatim(
             user_agent="geo_checker_unique"

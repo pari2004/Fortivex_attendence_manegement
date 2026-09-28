@@ -15,6 +15,7 @@ from email.mime.image import MIMEImage
 from os import path
 from urllib.parse import parse_qs, unquote, urlencode, urlparse
 
+import pandas as pd
 from dateutil import parser
 from django import forms
 from django.apps import apps
@@ -188,7 +189,6 @@ from horilla.decorators import (
 )
 from horilla.group_by import group_by_queryset
 from horilla.http.response import HorillaRedirect
-from horilla.lazy_imports import LazyModule
 from horilla.menu import get_settings_menu
 from horilla.methods import get_horilla_model_class, remove_dynamic_url
 from horilla_audit.forms import HistoryTrackingFieldsForm
@@ -196,8 +196,6 @@ from horilla_audit.models import AccountBlockUnblock, AuditTag, HistoryTrackingF
 from horilla_auth.models import HorillaUser
 from notifications.models import Notification
 from notifications.signals import notify
-
-pd = LazyModule("pandas")
 
 CHARTS = [
     ("employee_work_info", _("Employee Work Info")),

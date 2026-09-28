@@ -10,6 +10,7 @@ from datetime import date, datetime, timedelta
 from io import BytesIO
 from urllib.parse import parse_qs, unquote
 
+import pandas as pd
 from django.apps import apps
 from django.conf import settings
 from django.contrib import messages
@@ -23,6 +24,7 @@ from django.utils.encoding import force_str
 from django.utils.translation import gettext as __
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_http_methods
+from xhtml2pdf import pisa
 
 from base.filters import PenaltyFilter
 from base.forms import PenaltyAccountForm
@@ -51,7 +53,6 @@ from horilla.decorators import (
 )
 from horilla.group_by import group_by_queryset
 from horilla.http.response import HorillaRedirect
-from horilla.lazy_imports import LazyModule
 from horilla.methods import get_horilla_model_class, remove_dynamic_url
 from leave.decorators import *
 from leave.filters import *
@@ -69,9 +70,6 @@ from leave.models import leave_requested_dates
 from leave.services import evaluate_leave_type_conditions
 from leave.threading import LeaveMailSendThread
 from notifications.signals import notify
-
-pd = LazyModule("pandas")
-pisa = LazyModule("xhtml2pdf.pisa")
 
 
 def generate_error_report(error_list, error_data, file_name):

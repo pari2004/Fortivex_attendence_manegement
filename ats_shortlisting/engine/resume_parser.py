@@ -15,19 +15,15 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 import pdfplumber
+import pytesseract
 from pdf2image import convert_from_path
 
 from ats_shortlisting.engine import domain_taxonomy
-from horilla.lazy_imports import LazyModule
 
 try:
     import phonenumbers
 except ImportError:  # pragma: no cover - dependency is in requirements.txt
     phonenumbers = None
-
-# Only needed for OCR of scanned PDFs; importing it eagerly also pulls in
-# pandas, which added ~125ms to every process start.
-pytesseract = LazyModule("pytesseract")
 
 logger = logging.getLogger("ats_shortlisting")
 

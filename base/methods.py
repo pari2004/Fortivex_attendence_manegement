@@ -8,6 +8,7 @@ import re
 from datetime import date, datetime, time, timedelta
 from types import SimpleNamespace
 
+import pandas as pd
 import pdfkit
 from django.apps import apps
 from django.conf import settings
@@ -32,9 +33,6 @@ from base.models import (
 )
 from employee.models import Employee, EmployeeWorkInformation
 from horilla.horilla_middlewares import _thread_locals
-from horilla.lazy_imports import LazyModule
-
-pd = LazyModule("pandas")
 
 CHART_CONFIG = {
     "offline_employees": {

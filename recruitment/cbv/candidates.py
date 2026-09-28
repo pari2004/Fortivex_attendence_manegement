@@ -23,11 +23,11 @@ from import_export import fields, resources
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
+from xhtml2pdf import pisa
 
 from employee.forms import BulkUpdateFieldForm
 from horilla.horilla_middlewares import _thread_locals
 from horilla.http.response import HorillaRedirect
-from horilla.lazy_imports import LazyModule
 from horilla_views.cbv_methods import (
     export_xlsx,
     hx_request_required,
@@ -59,8 +59,6 @@ from recruitment.models import (
     RejectedCandidate,
     SkillZoneCandidate,
 )
-
-pisa = LazyModule("xhtml2pdf.pisa")
 
 _getattribute = getattribute
 
