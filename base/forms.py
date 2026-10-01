@@ -3109,8 +3109,11 @@ class PassWordResetForm(forms.Form):
         user.
         """
         username = self.cleaned_data["email"]
-        user = HorillaUser.objects.get(username=username)
-        employee = user.employee_get
+        try:
+            user = HorillaUser.objects.get(username=username)
+            employee = user.employee_get
+        except (HorillaUser.DoesNotExist, HorillaUser.employee_get.RelatedObjectDoesNotExist):
+            return
         email = employee.email
         work_mail = None
         try:
