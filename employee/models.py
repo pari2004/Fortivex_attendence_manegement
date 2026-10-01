@@ -746,6 +746,12 @@ class Employee(models.Model):
                     username=username, email=username, password=password
                 )
             self.employee_user_id = user
+            # Persist the link now: the recursive self.save() below only runs
+            # when employee_work_info is missing, so an employee that already
+            # has work info (e.g. re-saved after losing its user link) would
+            # otherwise keep employee_user_id as None in the database forever
+            # while a fresh, unlinked HorillaUser piles up on every save.
+            Employee.objects.filter(pk=self.pk).update(employee_user_id=user)
             # default permissions
             change_ownprofile = Permission.objects.get(codename="change_ownprofile")
             view_ownprofile = Permission.objects.get(codename="view_ownprofile")

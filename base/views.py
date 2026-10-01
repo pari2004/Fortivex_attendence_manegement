@@ -857,7 +857,7 @@ class HorillaPasswordResetView(PasswordResetView):
         EMAIL_BACKEND = getattr(settings, "EMAIL_BACKEND", "")
         if EMAIL_BACKEND and default != EMAIL_BACKEND:
             is_default_backend = False
-        if is_default_backend and not email_backend.configuration:
+        if is_default_backend and not email_backend.dynamic_host:
             messages.error(self.request, _("Primary mail server is not configured"))
             return redirect("forgot-password")
 
@@ -900,7 +900,7 @@ class EmployeePasswordResetView(PasswordResetView):
             EMAIL_BACKEND = getattr(settings, "EMAIL_BACKEND", "")
             if EMAIL_BACKEND and default != EMAIL_BACKEND:
                 is_default_backend = False
-            if is_default_backend and not email_backend.configuration:
+            if is_default_backend and not email_backend.dynamic_host:
                 messages.error(self.request, _("Primary mail server is not configured"))
                 return HorillaRedirect(self.request)
 
